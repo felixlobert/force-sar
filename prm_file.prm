@@ -1,0 +1,83 @@
+++PARAM_SAR_START++
+
+# INPUT/OUTPUT DIRECTORIES
+# ------------------------------------------------------------------------
+# Lower Level datapool (directory to store tiled data)
+# Type: full directory path
+DIR_LOWER = /home/eouser/force_sar_output
+
+# DIAS CONFIGURATION
+# ------------------------------------------------------------------------
+# Local satellite data repository
+# Type: full directory path
+DIR_REPO = /codede
+# Directory of SRTM 1Sec HGT DEM
+# Type: full directory path
+DIR_DEM = /codede/auxdata/SRTMGL1/dem
+# Directory of S1 orbit files
+# Type: full directory path
+DIR_ORBIT = /codede/auxdata/orbits
+
+# PARALLEL PROCESSING
+# ------------------------------------------------------------------------
+# Type: Integer. Valid range: [1,...
+NTHREAD = 4
+
+# PROCESSING EXTENT AND RESOLUTION
+# ------------------------------------------------------------------------
+# Analysis extent, given in tile numbers (see tile naming)
+# Each existing tile falling into this square extent will be processed
+# A shapefile of the tiles can be generated with force-tabulate-grid
+# Type: Integer list. Valid range: [-999,9999]
+X_TILE_RANGE = 66 67
+Y_TILE_RANGE = 45 46
+# Allow-list of tiles. Can be used to further limit the analysis extent to
+# non-square extents. The allow-list is intersected with the analysis extent,
+# i.e. only tiles included in both the analysis extent AND the allow-list will
+# be processed.
+# Optional. If NULL, the complete analysis extent is processed
+# Type: full file path
+FILE_TILE = /home/eouser/projects/force-sar/file_tile.til
+# Analysis resolution. The tile (and block) size must be dividable by this
+# resolution without remainder, e.g. 30m resolution with 100km tiles is not possible
+# Type: Double. Valid range: ]0,BLOCK_SIZE]
+RESOLUTION = 10
+
+# SENSOR ALLOW-LIST
+# ------------------------------------------------------------------------
+# Sensors to be used in the analysis. Multi-sensor analyses are restricted
+# to the overlapping bands. Following sensors are available: 
+# S1AIA (2-band VV-VH Sentinel-1A IW ascending), S1BIA (2-band VV-VH Senti-
+# nel-1B IW ascending), S1AID (2-band VV-VH Sentinel-1A IW descending), S1BID
+# (2-band VV-VH Sentinel-1B IW descending)
+# The resulting outputs are named according to their band designation, i.e. 
+# VVVHP (VV/VH polarized)
+# Type: Character list. Valid values: {S1AIA,S1BIA,S1AID,S1BID}
+SENSORS = S1AIA S1BIA S1AID S1BID
+
+# PROCESSING TIMEFRAME
+# ------------------------------------------------------------------------
+# Time extent for the analysis. All data between these dates will be used in
+# the analysis.
+# Type: Date list. Format: YYYY-MM-DD
+DATE_RANGE = 2020-01-01 2020-01-31
+# DOY range for filtering the time extent. Day-of-Years that are outside of
+# the given interval will be ignored. Example: DATE_RANGE = 2010-01-01 
+# 2019-12-31, DOY_RANGE = 91 273 will use all April-Sepember observations from
+# 2010-2019. If you want to extend this window over years give DOY min > 
+# DOY max. Example: DATE_RANGE = 2010-01-01 2019-12-31, DOY_RANGE = 274 90 
+# will use all October-March observations from 2010-2019.
+# Type: Integer list. Valid values: [1,365]
+DOY_RANGE = 1 365
+
+# BACKSCATTER-COEFFICIENT PROCESSING
+# ------------------------------------------------------------------------
+# Mode of radiometric correction applied to the data
+# Type: Character. Valid values: {GAMMA, BETA, SIGMA}
+RADIOMETRIC_CORRECTION = GAMMA
+# Which Speckle-Filter should be applied?
+# Type: Character. Valid values: {BOXCAR, MEDIAN}
+SPECKLE_FILTER = BOXCAR
+FILTER_SIZE = 3
+
+++PARAM_SAR_END++
