@@ -10,9 +10,9 @@ eval $DIRECTORIES
 # run docker container with correct paths
 docker run \
     -t -d \
-    -u root \
     --name force-sar-container \
     -v $PRM_FILE:/force-sar/prm_file.prm \
+    -v $DIR_ARCHIVE:$DIR_ARCHIVE \
     -v $DIR_LOWER:$DIR_LOWER \
     -v $DIR_REPO:$DIR_REPO \
     -v $DIR_DEM:/root/.snap/auxdata/dem/SRTM\ 1Sec\ HGT \
