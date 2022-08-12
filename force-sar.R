@@ -41,7 +41,6 @@ if (!FILE_TILE == "NULL") {
   
 }
 
-temp_dir = DIR_LOWER #tempdir()
 
 
 # query scenes for given parameters
@@ -54,48 +53,63 @@ scenes <-
   st_transform(st_crs(force.grid))
 
 
-
-scene <- scenes[1,]
-
-
-
-fname <- paste0(
-  format(scene$date, "%Y%m%d"),
-  "_",
-  scene$platform,
-  ifelse(scene$orbitDirection == "ascending", "IA", "ID"),
-  "_N",
-  round(scene$centroidLat, 1)*10,
-  "_E",
-  round(scene$centroidLon, 1)*10,
-  ".tif"
-)
-
-
-subset <- force.grid %>%
-  summarise() %>%
-  st_intersection(scene) %>%
-  sf::st_transform(4326) %>%
-  sf::st_bbox() %>%
-  sf::st_as_sfc() %>%
-  sf::st_as_text(digits=15)
-
-
-graph <- "graphs/grd_to_gamma0.xml"
-
-
-cmd <-
-  paste0(
-    "/usr/local/snap/bin/gpt ",
-    graph,
-    " -Pinput=", scene$productPath, "/manifest.safe",
-    " -Poutput=", temp_dir, "/", fname,
-    " -Pspeckle_filter=", stringr::str_to_sentence(SPECKLE_FILTER),
-    " -Pfilter_size=", FILTER_SIZE,
-    " -Presolution=", RESOLUTION,
-    " -Paoi=\"", subset,"\""
+for(i in 1:nrow(scenes)){
+  
+  scene <- scenes[i,]
+  
+  
+  
+  fname <- paste0(
+    DIR_ARCHIVE, "/",
+    format(scene$date, "%Y%m%d"),
+    "_",
+    stringr::str_pad(scene$relativeOrbitNumber, width = 3, side = "left", pad = "0"),
+    "_",
+    scene$platform,
+    ifelse(scene$orbitDirection == "ascending", "IA", "ID"),
+    "_N",
+    stringr::str_pad(round(scene$centroidLat, 1)*10, width = 3, side = "left", pad = "0"),
+    "_E",
+    stringr::str_pad(round(scene$centroidLon, 1)*10, width = 3, side = "left", pad = "0"),
+    ".tif"
   )
-
-
-system(cmd)
-
+  
+  
+  
+  if(file.exists(fname)) next
+  
+  
+  extents_overlap = TRUE
+  
+  tryCatch(
+    subset <- force.grid %>%
+      summarise() %>%
+      st_intersection(scene) %>%
+      sf::st_transform(4326) %>%
+      sf::st_bbox() %>%
+      sf::st_as_sfc() %>%
+      sf::st_as_text(digits=15),
+    error = function(e) extents_overlap <<- FALSE)
+  
+  if(!extents_overlap) next
+  
+  
+  graph <- "graphs/grd_to_gamma0.xml"
+  
+  
+  cmd <-
+    paste0(
+      "/usr/local/snap/bin/gpt ",
+      graph,
+      " -Pinput=", scene$productPath, "/manifest.safe",
+      " -Poutput=", fname,
+      " -Pspeckle_filter=", stringr::str_to_sentence(SPECKLE_FILTER),
+      " -Pfilter_size=", FILTER_SIZE,
+      " -Presolution=", RESOLUTION,
+      " -Paoi=\"", subset,"\""
+    )
+  
+  
+  system(cmd)
+  
+}
