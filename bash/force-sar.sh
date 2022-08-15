@@ -24,3 +24,18 @@ docker exec force-sar-container Rscript R/force-sar.R
 
 docker stop force-sar-container
 docker rm force-sar-container
+
+
+ACQUISITIONS=$(sudo ls $DIR_ARCHIVE | grep '.tif' | cut -f1-3 -d'_' | uniq)
+
+for ACQUISITION in $ACQUISITIONS
+do
+
+    sudo gdalbuildvrt -vrtnodata -9999 -srcnodata 0 $DIR_ARCHIVE/${ACQUISITION}_SIG.vrt $DIR_ARCHIVE/$ACQUISITION*.tif
+
+
+    sudo force-cube -o $DIR_LOWER -n -9999 $DIR_ARCHIVE/${ACQUISITION}_SIG.vrt 
+
+done
+
+
