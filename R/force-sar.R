@@ -7,7 +7,7 @@ library(tidyr)
 # load parameter-file and assign as variables
 prm <-
   read.delim(
-    "prm_file.prm",
+    "data/test_params/prm_file.prm",
     sep = "=",
     strip.white = T,
     comment.char = "#",
@@ -25,13 +25,13 @@ if (!FILE_TILE == "NULL") {
   
   tiles <- read.delim(FILE_TILE, skip = 1, header = F)[, 1]
   
-  force.grid <- "force_grid/FORCE_GRIDS_germany_EPSG3035.shp" %>% 
+  force.grid <- "data/force_grid/FORCE_GRIDS_germany_EPSG3035.shp" %>% 
     st_read(quiet = T) %>%
     filter(Name %in% tiles)
   
 } else {
   
-  force.grid <- "force_grid/FORCE_GRIDS_germany_EPSG3035.shp" %>% 
+  force.grid <- "data/force_grid/FORCE_GRIDS_germany_EPSG3035.shp" %>% 
     st_read(quiet = T) %>%
     separate(col = Name, sep = c(3, 5, 9), into = c(NA, "X", NA, "Y"), remove = F) %>%
     filter(
@@ -75,7 +75,6 @@ for(i in 1:nrow(scenes)){
   )
   
   
-  
   if(file.exists(fname)) next
   
   
@@ -94,9 +93,7 @@ for(i in 1:nrow(scenes)){
   if(!extents_overlap) next
   
   
-  graph <- "graphs/grd_to_gamma0.xml"
-  
-  
+  graph <- "data/graphs/grd_to_gamma0.xml"
   cmd <-
     paste0(
       "/usr/local/snap/bin/gpt ",
