@@ -62,9 +62,7 @@ for(i in 1:nrow(scenes)){
   fname <- paste0(
     DIR_ARCHIVE, "/",
     format(scene$date, "%Y%m%d"),
-    "_",
-    stringr::str_pad(scene$relativeOrbitNumber, width = 3, side = "left", pad = "0"),
-    "_",
+    "_LEVEL2_",
     scene$platform,
     ifelse(scene$orbitDirection == "ascending", "IA", "ID"),
     "_N",
@@ -93,7 +91,7 @@ for(i in 1:nrow(scenes)){
   if(!extents_overlap) next
   
   
-  graph <- "data/graphs/grd_to_gamma0.xml"
+  graph <- "graphs/grd_to_gamma0.xml"
   cmd <-
     paste0(
       "/usr/local/snap/bin/gpt ",

@@ -40,7 +40,7 @@ Y_TILE_RANGE = 45 46
 # be processed.
 # Optional. If NULL, the complete analysis extent is processed
 # Type: full file path
-FILE_TILE = /home/eouser/projects/force-sar/file_tile.til
+FILE_TILE = /home/eouser/projects/force-sar/data/test_params/file_tile.til
 # Analysis resolution. The tile (and block) size must be dividable by this
 # resolution without remainder, e.g. 30m resolution with 100km tiles is not possible
 # Type: Double. Valid range: ]0,BLOCK_SIZE]
