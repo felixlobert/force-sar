@@ -11,7 +11,7 @@ eval $DIRECTORIES
 docker run \
     -t -d \
     --name force-sar-container \
-    -v $PRM_FILE:/force-sar/prm_file.prm \
+    -v $PRM_FILE:/force-sar/data/test_params/prm_file.prm \
     -v $DIR_ARCHIVE:$DIR_ARCHIVE \
     -v $DIR_LOWER:$DIR_LOWER \
     -v $DIR_REPO:$DIR_REPO \
@@ -20,7 +20,7 @@ docker run \
     -v $FILE_TILE:$FILE_TILE \
     force-sar
 
-docker exec force-sar-container Rscript force-sar.R
+docker exec force-sar-container Rscript R/force-sar.R
 
 docker stop force-sar-container
 docker rm force-sar-container
