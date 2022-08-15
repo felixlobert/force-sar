@@ -14,7 +14,7 @@ prm <-
     row.names = NULL
   )
 
-for (i in 1:nrow(prm)) {
+for (i in seq_len(nrow(prm))) {
   assign(prm[i, 1], prm[i, 2])
 }
 
@@ -53,7 +53,7 @@ scenes <-
   st_transform(st_crs(force.grid))
 
 
-for(i in 1:nrow(scenes)){
+for(i in seq_len(nrow(scenes))){
   
   scene <- scenes[i,]
   
