@@ -4,7 +4,7 @@
 PRM_FILE=$1
 
 # grep directories from prm-file, remove whitespace and define in environment
-DIRECTORIES=$(cat $PRM_FILE | grep '^DIR\|^FILE' | grep -v 'NULL' | sed -r '/[^=]+=[^=]+/!d' | sed -r 's/\s+=\s/=/g')
+DIRECTORIES=$(cat $PRM_FILE | grep '^DIR\|^FILE\|^RESOLUTION\|^NTHREAD' | grep -v 'NULL' | sed -r '/[^=]+=[^=]+/!d' | sed -r 's/\s+=\s/=/g')
 eval $DIRECTORIES
 
 # start docker container with esa SNAP and R and connect paths given in prm file
@@ -35,7 +35,7 @@ for ACQUISITION in $ACQUISITIONS
 do
     sudo gdalbuildvrt -vrtnodata -9999 -srcnodata -9999 $DIR_ARCHIVE/${ACQUISITION}_GAM.vrt $DIR_ARCHIVE/$ACQUISITION*.tif
 
-    sudo force-cube -o $DIR_LOWER -n -9999 -r near -j $NTHREAD -s $RESOLUTION $DIR_ARCHIVE/${ACQUISITION}_GAM.vrt 
+    sudo force-cube -o $DIR_LOWER -n -9999 -t Int16 -r near -j $NTHREAD -s $RESOLUTION $DIR_ARCHIVE/${ACQUISITION}_GAM.vrt 
 done
 
 
