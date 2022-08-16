@@ -23,19 +23,26 @@ docker run \
 # query and process data inside docker container
 docker exec force-sar-container Rscript R/force-sar.R
 
+gid=$(id -g $USER)
+uid=$(id -u $USER)
+
+docker exec force-sar-container groupadd --gid $gid $USER
+docker exec force-sar-container useradd --uid $uid --gid $gid $USER
+docker exec force-sar-container chown -R $USER:$USER $DIR_ARCHIVE
+
 # stop container
 docker stop force-sar-container
 docker rm force-sar-container
 
-# define unique date and orbit pairs from processed scenes
-ACQUISITIONS=$(sudo ls $DIR_ARCHIVE | grep '.tif' | cut -f1-3 -d'_' | uniq)
+# # define unique date and orbit pairs from processed scenes
+ACQUISITIONS=$(ls $DIR_ARCHIVE | grep '.tif' | cut -f1-3 -d'_' | uniq)
 
 # loop over date orbit combinations to create a mosaic and tile into existing force cube
 for ACQUISITION in $ACQUISITIONS
 do
-    sudo gdalbuildvrt -vrtnodata -9999 -srcnodata -9999 $DIR_ARCHIVE/${ACQUISITION}_GAM.vrt $DIR_ARCHIVE/$ACQUISITION*.tif
+    gdalbuildvrt -vrtnodata -9999 -srcnodata -9999 $DIR_ARCHIVE/${ACQUISITION}_GAM.vrt $DIR_ARCHIVE/$ACQUISITION*.tif
 
-    sudo force-cube -o $DIR_LOWER -n -9999 -t Int16 -r near -j $NTHREAD -s $RESOLUTION $DIR_ARCHIVE/${ACQUISITION}_GAM.vrt 
+    force-cube -o $DIR_LOWER -n -9999 -t Int16 -r near -j $NTHREAD -s $RESOLUTION $DIR_ARCHIVE/${ACQUISITION}_GAM.vrt 
 done
 
 
