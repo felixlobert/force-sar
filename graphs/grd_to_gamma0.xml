@@ -121,10 +121,58 @@
       <copyMetadata>true</copyMetadata>
     </parameters>
   </node>
+  <node id="LinearToFromdB">
+    <operator>LinearToFromdB</operator>
+    <sources>
+      <sourceProduct refid="Subset"/>
+    </sources>
+    <parameters class="com.bc.ceres.binding.dom.XppDomElement">
+      <sourceBands/>
+    </parameters>
+  </node>
+<node id="BandMaths">
+    <operator>BandMaths</operator>
+    <sources>
+      <sourceProduct refid="LinearToFromdB"/>
+    </sources>
+    <parameters class="com.bc.ceres.binding.dom.XppDomElement">
+      <targetBands>
+        <targetBand>
+          <name>Gamma0_VV_db</name>
+          <type>float32</type>
+          <expression>Gamma0_VV_db * 100</expression>
+          <description/>
+          <unit/>
+          <noDataValue>0.0</noDataValue>
+        </targetBand>
+        <targetBand>
+          <name>Gamma0_VH_db</name>
+          <type>float32</type>
+          <expression>Gamma0_VH_db * 100</expression>
+          <description/>
+          <unit/>
+          <noDataValue>0.0</noDataValue>
+        </targetBand>
+      </targetBands>
+      <variables/>
+    </parameters>
+  </node>
+  <node id="Convert-Datatype">
+    <operator>Convert-Datatype</operator>
+    <sources>
+      <sourceProduct refid="BandMaths"/>
+    </sources>
+    <parameters class="com.bc.ceres.binding.dom.XppDomElement">
+      <sourceBands/>
+      <targetDataType>int16</targetDataType>
+      <targetScalingStr>Truncate</targetScalingStr>
+      <targetNoDataValue>-9999</targetNoDataValue>
+    </parameters>
+  </node>
   <node id="Write">
     <operator>Write</operator>
     <sources>
-      <sourceProduct refid="Subset"/>
+      <sourceProduct refid="Convert-Datatype"/>
     </sources>
     <parameters class="com.bc.ceres.binding.dom.XppDomElement">
       <file>$output</file>
