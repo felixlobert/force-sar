@@ -83,9 +83,9 @@ for(i in seq_len(nrow(scenes))){
     subset <- force.grid %>%
       summarise() %>%
       st_intersection(scene) %>%
-      sf::st_transform(4326) %>%
       sf::st_bbox() %>%
       sf::st_as_sfc() %>%
+      sf::st_transform(4326) %>%
       sf::st_as_text(digits=15),
     error = function(e) extents_overlap <<- FALSE)
   
