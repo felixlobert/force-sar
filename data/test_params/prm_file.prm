@@ -12,8 +12,8 @@ DIR_LOWER = /home/eouser/data/force_sar_output
 # DIAS CONFIGURATION
 # ------------------------------------------------------------------------
 # Local satellite data repository
-# Type: full directory path
-DIR_REPO = /codede
+# Type: Character list. Valid values: {CODEDE,CREODIAS}
+REPO = CODEDE
 # Directory of SRTM 1Sec HGT DEM
 # Type: full directory path
 DIR_DEM = /codede/auxdata/SRTMGL1/dem

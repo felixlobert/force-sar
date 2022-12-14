@@ -48,7 +48,7 @@ scenes <-
   getScenes(aoi = force.grid,
             startDate = stringr::str_split(DATE_RANGE, " ")[[1]][1],
             endDate = stringr::str_split(DATE_RANGE, " ")[[1]][2],
-            satellite = "Sentinel1",
+            satellite = "Sentinel1", codede = REPO == "CODEDE",
             productType = "GRD") %>%
   {if(!ORBITS == "NULL") filter(., relativeOrbitNumber %in% stringr::str_split(ORBITS, " ")[[1]]) else .} %>%
   st_transform(st_crs(force.grid))
