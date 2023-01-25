@@ -22,7 +22,7 @@ RUN apt-get -y install libgdal-dev libproj-dev libgeos-dev libudunits2-dev libca
 
 # install R-packges
 RUN R -e "install.packages('remotes')"
-RUN R -e "remotes::install_github('felixlobert/rcodede')"
+RUN R -e "remotes::install_github('felixlobert/rcodede@b4ceac7060ab3e1c2bbb5eddf77e8c8727b1c17a')"
 RUN R -e "install.packages('parallel')"
 RUN R -e "install.packages('lubridate')"
 RUN R -e "install.packages('stringr')"
