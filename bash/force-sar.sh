@@ -4,7 +4,7 @@
 PRM_FILE=$1
 
 # grep directories from prm-file, remove whitespace and define in environment
-DIRECTORIES=$(cat $PRM_FILE | grep '^DIR\|^FILE\|^RESOLUTION\|^NTHREAD' | grep -v 'NULL' | sed -r '/[^=]+=[^=]+/!d' | sed -r 's/\s+=\s/=/g')
+DIRECTORIES=$(cat $PRM_FILE | grep '^DIR\|^FORCE_GRID\|^FILE\|^RESOLUTION\|^NTHREAD' | grep -v 'NULL' | sed -r '/[^=]+=[^=]+/!d' | sed -r 's/\s+=\s/=/g')
 eval $DIRECTORIES
 
 # start docker container with esa SNAP and R and connect paths given in prm file
@@ -12,6 +12,7 @@ docker run \
     -t -d \
     --name force-sar-container \
     -v $PRM_FILE:/force-sar/data/test_params/prm_file.prm \
+    -v $FORCE_GRID:$FORCE_GRID \
     -v $DIR_ARCHIVE:$DIR_ARCHIVE \
     -v $DIR_LOWER:$DIR_LOWER \
     -v $DIR_REPO:$DIR_REPO \

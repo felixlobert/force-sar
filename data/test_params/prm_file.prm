@@ -8,6 +8,9 @@ DIR_ARCHIVE = /home/eouser/data/force_sar_archive
 # Lower Level datapool (directory to store tiled data)
 # Type: full directory path
 DIR_LOWER = /home/eouser/data/force_sar_output
+# FORCE-Grid (path to vector geometry of the used grid)
+# Type: full file path
+FORCE_GRID = /home/eouser/projects/force-sar/data/force_grid/FORCE_GRIDS_europe_EPSG3035.gpkg
 
 # DIAS CONFIGURATION
 # ------------------------------------------------------------------------

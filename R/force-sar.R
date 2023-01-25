@@ -25,18 +25,17 @@ if (!FILE_TILE == "NULL") {
   
   tiles <- read.delim(FILE_TILE, skip = 1, header = F)[, 1]
   
-  force.grid <- "data/force_grid/FORCE_GRIDS_germany_EPSG3035.shp" %>% 
+  force.grid <- FORCE_GRID %>% 
     st_read(quiet = T) %>%
-    filter(Name %in% tiles)
+    filter(Tile_ID %in% tiles)
   
 } else {
   
-  force.grid <- "data/force_grid/FORCE_GRIDS_germany_EPSG3035.shp" %>% 
+  force.grid <- FORCE_GRID %>% 
     st_read(quiet = T) %>%
-    separate(col = Name, sep = c(3, 5, 9), into = c(NA, "X", NA, "Y"), remove = F) %>%
     filter(
-      X %in% stringr::str_split(X_TILE_RANGE, " ")[[1]][1]:stringr::str_split(X_TILE_RANGE, " ")[[1]][2],
-      Y %in% stringr::str_split(Y_TILE_RANGE, " ")[[1]][1]:stringr::str_split(Y_TILE_RANGE, " ")[[1]][2]
+      Tile_X %in% stringr::str_split(X_TILE_RANGE, " ")[[1]][1]:stringr::str_split(X_TILE_RANGE, " ")[[1]][2],
+      Tile_Y %in% stringr::str_split(Y_TILE_RANGE, " ")[[1]][1]:stringr::str_split(Y_TILE_RANGE, " ")[[1]][2]
     )
   
 }
