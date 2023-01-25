@@ -47,17 +47,18 @@ scenes <-
   getScenes(aoi = force.grid,
             startDate = stringr::str_split(DATE_RANGE, " ")[[1]][1],
             endDate = stringr::str_split(DATE_RANGE, " ")[[1]][2],
-            satellite = "Sentinel1", codede = REPO == "CODEDE",
+            satellite = "Sentinel1", codede = DIR_REPO == "/codede",
             productType = "GRD") %>%
   {if(!ORBITS == "NULL") filter(., relativeOrbitNumber %in% stringr::str_split(ORBITS, " ")[[1]]) else .} %>%
+  st_transform(st_crs(force.grid)) %>% 
   filter(st_intersects(., force.grid) %>% lengths() > 0) %>% 
+  filter(stringr::str_detect(productPath, "_IW_GRDH_"))
+
 
 
 for(i in seq_len(nrow(scenes))){
   
   scene <- scenes[i,]
-  
-  
   
   fname <- paste0(
     DIR_ARCHIVE, "/",
