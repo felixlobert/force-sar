@@ -50,7 +50,7 @@ scenes <-
             satellite = "Sentinel1", codede = REPO == "CODEDE",
             productType = "GRD") %>%
   {if(!ORBITS == "NULL") filter(., relativeOrbitNumber %in% stringr::str_split(ORBITS, " ")[[1]]) else .} %>%
-  st_transform(st_crs(force.grid))
+  filter(st_intersects(., force.grid) %>% lengths() > 0) %>% 
 
 
 for(i in seq_len(nrow(scenes))){
