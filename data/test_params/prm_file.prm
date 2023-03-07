@@ -8,12 +8,15 @@ DIR_ARCHIVE = /home/eouser/data/force_sar_archive
 # Lower Level datapool (directory to store tiled data)
 # Type: full directory path
 DIR_LOWER = /home/eouser/data/force_sar_output
+# FORCE-Grid (path to vector geometry of the used grid)
+# Type: full file path
+FORCE_GRID = /home/eouser/projects/force-sar/data/force_grid/FORCE_GRIDS_europe_EPSG3035.gpkg
 
 # DIAS CONFIGURATION
 # ------------------------------------------------------------------------
 # Local satellite data repository
-# Type: full directory path
-DIR_REPO = /codede
+# Type: Character list. Valid values: {CODEDE,CREODIAS}
+REPO = CODEDE
 # Directory of SRTM 1Sec HGT DEM
 # Type: full directory path
 DIR_DEM = /codede/auxdata/SRTMGL1/dem
@@ -66,7 +69,7 @@ ORBITS = NULL
 # Time extent for the analysis. All data between these dates will be used in
 # the analysis.
 # Type: Date list. Format: YYYY-MM-DD
-DATE_RANGE = 2020-01-01 2020-01-03
+DATE_RANGE = 2020-01-01 2020-07-01
 # DOY range for filtering the time extent. Day-of-Years that are outside of
 # the given interval will be ignored. Example: DATE_RANGE = 2010-01-01 
 # 2019-12-31, DOY_RANGE = 91 273 will use all April-Sepember observations from

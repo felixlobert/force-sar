@@ -25,18 +25,17 @@ if (!FILE_TILE == "NULL") {
   
   tiles <- read.delim(FILE_TILE, skip = 1, header = F)[, 1]
   
-  force.grid <- "data/force_grid/FORCE_GRIDS_germany_EPSG3035.shp" %>% 
+  force.grid <- FORCE_GRID %>% 
     st_read(quiet = T) %>%
-    filter(Name %in% tiles)
+    filter(Tile_ID %in% tiles)
   
 } else {
   
-  force.grid <- "data/force_grid/FORCE_GRIDS_germany_EPSG3035.shp" %>% 
+  force.grid <- FORCE_GRID %>% 
     st_read(quiet = T) %>%
-    separate(col = Name, sep = c(3, 5, 9), into = c(NA, "X", NA, "Y"), remove = F) %>%
     filter(
-      X %in% stringr::str_split(X_TILE_RANGE, " ")[[1]][1]:stringr::str_split(X_TILE_RANGE, " ")[[1]][2],
-      Y %in% stringr::str_split(Y_TILE_RANGE, " ")[[1]][1]:stringr::str_split(Y_TILE_RANGE, " ")[[1]][2]
+      Tile_X %in% stringr::str_split(X_TILE_RANGE, " ")[[1]][1]:stringr::str_split(X_TILE_RANGE, " ")[[1]][2],
+      Tile_Y %in% stringr::str_split(Y_TILE_RANGE, " ")[[1]][1]:stringr::str_split(Y_TILE_RANGE, " ")[[1]][2]
     )
   
 }
@@ -48,16 +47,18 @@ scenes <-
   getScenes(aoi = force.grid,
             startDate = stringr::str_split(DATE_RANGE, " ")[[1]][1],
             endDate = stringr::str_split(DATE_RANGE, " ")[[1]][2],
-            satellite = "Sentinel1",
+            satellite = "Sentinel1", codede = DIR_REPO == "/codede",
             productType = "GRD") %>%
-  st_transform(st_crs(force.grid))
+  {if(!ORBITS == "NULL") filter(., relativeOrbitNumber %in% stringr::str_split(ORBITS, " ")[[1]]) else .} %>%
+  st_transform(st_crs(force.grid)) %>% 
+  filter(st_intersects(., force.grid) %>% lengths() > 0) %>% 
+  filter(stringr::str_detect(productPath, "_IW_GRDH_"))
+
 
 
 for(i in seq_len(nrow(scenes))){
   
   scene <- scenes[i,]
-  
-  
   
   fname <- paste0(
     DIR_ARCHIVE, "/",
@@ -82,9 +83,9 @@ for(i in seq_len(nrow(scenes))){
     subset <- force.grid %>%
       summarise() %>%
       st_intersection(scene) %>%
-      sf::st_transform(4326) %>%
       sf::st_bbox() %>%
       sf::st_as_sfc() %>%
+      sf::st_transform(4326) %>%
       sf::st_as_text(digits=15),
     error = function(e) extents_overlap <<- FALSE)
   
