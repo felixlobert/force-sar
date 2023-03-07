@@ -82,7 +82,7 @@ DOY_RANGE = 1 365
 # Type: Character. Valid values: {GAMMA, BETA, SIGMA}
 RADIOMETRIC_CORRECTION = GAMMA
 # Which Speckle-Filter should be applied?
-# Type: Character. Valid values: {BOXCAR, MEDIAN}
+# Type: Character. Valid values: {BOXCAR, MEDIAN,  FROST, GAMMA MAP, LEE, REFINED LEE, LEE SIGMA}
 SPECKLE_FILTER = BOXCAR
 FILTER_SIZE = 3
 
