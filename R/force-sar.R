@@ -99,7 +99,7 @@ for(i in seq_len(nrow(scenes))){
       graph,
       " -Pinput=", scene$productPath, "/manifest.safe",
       " -Poutput=", fname,
-      " -Pspeckle_filter=", stringr::str_to_sentence(SPECKLE_FILTER),
+      " -Pspeckle_filter='", stringr::str_to_title(SPECKLE_FILTER), "'",
       " -Pfilter_size=", FILTER_SIZE,
       " -Presolution=", RESOLUTION,
       " -Paoi=\"", subset,"\""
