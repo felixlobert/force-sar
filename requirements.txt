@@ -1,0 +1,7 @@
+# local package
+-e .
+
+# external requirements
+pandas
+geopandas
+requests

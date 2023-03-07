@@ -11,7 +11,7 @@ eval $DIRECTORIES
 docker run \
     -t -d \
     --name force-sar-container \
-    -v $PRM_FILE:/force-sar/data/test_params/prm_file.prm \
+    -v $PRM_FILE:$PRM_FILE \
     -v $FORCE_GRID:$FORCE_GRID \
     -v $DIR_ARCHIVE:$DIR_ARCHIVE \
     -v $DIR_LOWER:$DIR_LOWER \
@@ -19,10 +19,10 @@ docker run \
     -v $DIR_DEM:/root/.snap/auxdata/dem/SRTM\ 1Sec\ HGT \
     -v $DIR_ORBIT:/root/.snap/auxdata/Orbits/ \
     -v $FILE_TILE:$FILE_TILE \
-    force-sar
+    force-sar-py
 
 # query and process data inside docker container
-docker exec force-sar-container Rscript R/force-sar.R
+docker exec force-sar-container python3 src/main.py $PRM_FILE
 
 gid=$(id -g $USER)
 uid=$(id -u $USER)
