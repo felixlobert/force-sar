@@ -2,22 +2,25 @@
 
 # INPUT/OUTPUT DIRECTORIES
 # ------------------------------------------------------------------------
+# Archive datapool (directory to store processed scenes)
+# Type: full directory path
+DIR_ARCHIVE = data/sar_archive/
 # Lower Level datapool (directory to store tiled data)
 # Type: full directory path
-DIR_ARCHIVE = /home/eouser/data/force_sar_archive
-# Lower Level datapool (directory to store tiled data)
-# Type: full directory path
-DIR_LOWER = /home/eouser/data/force_sar_output
-# FORCE-Grid (path to vector geometry of the used grid)
+DIR_LOWER = data/sar_cube/
+# FORCE-Grid (path to vector geometry of the used grid, can be created 
+# with force-tabulate grid)
 # Type: full file path
-FORCE_GRID = /home/eouser/projects/force-sar/data/force_grid/FORCE_GRIDS_europe_EPSG3035.gpkg
+FORCE_GRID = projects/force-sar/example/force_grid.gpkg
 
 # DIAS CONFIGURATION
 # ------------------------------------------------------------------------
-# Local satellite data repository
+# Satellite data repository to use.
 # Type: Character list. Valid values: {CODEDE,CREODIAS}
 REPO = CREODIAS
-DIR_REPO = /eodata/
+# Mountpoint of satellite data repository.
+# Type: full file path
+DIR_REPO = /eodata
 # Directory of SRTM 1Sec HGT DEM
 # Type: full directory path
 DIR_DEM = /eodata/auxdata/SRTMGL1/dem
@@ -28,7 +31,10 @@ DIR_ORBIT = /eodata/auxdata/orbits
 # PARALLEL PROCESSING
 # ------------------------------------------------------------------------
 # Type: Integer. Valid range: [1,...
-NTHREAD = 4
+NTHREAD = 14
+# Maximum memory to use in G.
+# Type: Integer. Valid range: [1,...
+MAX_MEMORY = 110
 
 # PROCESSING EXTENT AND RESOLUTION
 # ------------------------------------------------------------------------
@@ -36,19 +42,19 @@ NTHREAD = 4
 # Each existing tile falling into this square extent will be processed
 # A shapefile of the tiles can be generated with force-tabulate-grid
 # Type: Integer list. Valid range: [-999,9999]
-X_TILE_RANGE = 66 67
-Y_TILE_RANGE = 45 46
+X_TILE_RANGE = 66 66
+Y_TILE_RANGE = 45 45
 # Allow-list of tiles. Can be used to further limit the analysis extent to
 # non-square extents. The allow-list is intersected with the analysis extent,
 # i.e. only tiles included in both the analysis extent AND the allow-list will
 # be processed.
 # Optional. If NULL, the complete analysis extent is processed
 # Type: full file path
-FILE_TILE = /home/eouser/projects/force-sar/data/test_params/file_tile.til
+FILE_TILE = example/prm_file.prm
 # Analysis resolution. The tile (and block) size must be dividable by this
 # resolution without remainder, e.g. 30m resolution with 100km tiles is not possible
 # Type: Double. Valid range: ]0,BLOCK_SIZE]
-RESOLUTION = 10
+RESOLUTION = 50
 
 # SENSOR ALLOW-LIST
 # ------------------------------------------------------------------------
