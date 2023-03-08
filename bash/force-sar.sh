@@ -1,5 +1,11 @@
 #!/bin/bash
 
+if [[ -z $1 ]]
+then
+    echo error: path to parameterfile needs to be set.
+    exit 1
+fi
+
 # set command input as path for parameterfile
 if [[ "$1" = /* ]]
 then
