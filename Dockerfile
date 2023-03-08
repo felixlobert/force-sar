@@ -1,4 +1,4 @@
-FROM mundialis/esa-snap:8.0-ubuntu
+FROM mundialis/esa-snap:9.0-ubuntu
 
 COPY . /force-sar/
 WORKDIR /force-sar/
