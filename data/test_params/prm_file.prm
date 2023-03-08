@@ -16,13 +16,14 @@ FORCE_GRID = /home/eouser/projects/force-sar/data/force_grid/FORCE_GRIDS_europe_
 # ------------------------------------------------------------------------
 # Local satellite data repository
 # Type: Character list. Valid values: {CODEDE,CREODIAS}
-REPO = CODEDE
+REPO = CREODIAS
+DIR_REPO = /eodata/
 # Directory of SRTM 1Sec HGT DEM
 # Type: full directory path
-DIR_DEM = /codede/auxdata/SRTMGL1/dem
+DIR_DEM = /eodata/auxdata/SRTMGL1/dem
 # Directory of S1 orbit files
 # Type: full directory path
-DIR_ORBIT = /codede/auxdata/orbits
+DIR_ORBIT = /eodata/auxdata/orbits
 
 # PARALLEL PROCESSING
 # ------------------------------------------------------------------------
@@ -62,14 +63,14 @@ RESOLUTION = 10
 SENSORS = S1AIA S1BIA S1AID S1BID
 # Orbits allow-list (NULL if all)
 # Type: Integer list. Valid values: [1,365]
-ORBITS = NULL
+ORBITS = 44
 
 # PROCESSING TIMEFRAME
 # ------------------------------------------------------------------------
 # Time extent for the analysis. All data between these dates will be used in
 # the analysis.
 # Type: Date list. Format: YYYY-MM-DD
-DATE_RANGE = 2020-01-01 2020-07-01
+DATE_RANGE = 2020-01-01 2020-01-06
 # DOY range for filtering the time extent. Day-of-Years that are outside of
 # the given interval will be ignored. Example: DATE_RANGE = 2010-01-01 
 # 2019-12-31, DOY_RANGE = 91 273 will use all April-Sepember observations from
@@ -86,7 +87,7 @@ DOY_RANGE = 1 365
 RADIOMETRIC_CORRECTION = GAMMA
 # Which Speckle-Filter should be applied?
 # Type: Character. Valid values: {BOXCAR, MEDIAN,  FROST, GAMMA MAP, LEE, REFINED LEE, LEE SIGMA}
-SPECKLE_FILTER = BOXCAR
+SPECKLE_FILTER = REFINED LEE
 FILTER_SIZE = 3
 
 ++PARAM_SAR_END++
