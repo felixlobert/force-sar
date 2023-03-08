@@ -7,7 +7,7 @@ PRM_FILE=$1
 DIRECTORIES=$(cat $PRM_FILE | grep '^DIR\|^FORCE_GRID\|^FILE\|^RESOLUTION\|^NTHREAD' | grep -v 'NULL' | sed -r '/[^=]+=[^=]+/!d' | sed -r 's/\s+=\s/=/g')
 eval $DIRECTORIES
 
-# start docker container with esa SNAP and R and connect paths given in prm file
+# start docker container with esa SNAP
 docker run \
     -t -d \
     --name force-sar-container \
@@ -35,15 +35,27 @@ docker exec force-sar-container chown -R $USER:$USER $DIR_ARCHIVE
 docker stop force-sar-container
 docker rm force-sar-container
 
-# # define unique date and orbit pairs from processed scenes
+# start force docker container for mosaicing and cubing files
+docker run \
+    -t -d \
+     --name force-container \
+    -v $DIR_LOWER:$DIR_LOWER \
+    -v $DIR_ARCHIVE:$DIR_ARCHIVE \
+    -u $(id -u):$(id -g) \
+    davidfrantz/force \
+    /bin/bash
+
+# define unique date and orbit pairs from processed scenes
 ACQUISITIONS=$(ls $DIR_ARCHIVE | grep '.tif' | cut -f1-3 -d'_' | uniq)
 
 # loop over date orbit combinations to create a mosaic and tile into existing force cube
 for ACQUISITION in $ACQUISITIONS
 do
-    gdalbuildvrt -vrtnodata -9999 -srcnodata -9999 $DIR_ARCHIVE/${ACQUISITION}_GAM.vrt $DIR_ARCHIVE/$ACQUISITION*.tif
+    docker exec force-container gdalbuildvrt -vrtnodata -9999 -srcnodata -9999 $DIR_ARCHIVE/${ACQUISITION}_GAM.vrt $DIR_ARCHIVE/$ACQUISITION*.tif
 
-    force-cube -o $DIR_LOWER -n -9999 -t Int16 -r near -j $NTHREAD -s $RESOLUTION $DIR_ARCHIVE/${ACQUISITION}_GAM.vrt 
+    docker exec force-container force-cube -o $DIR_LOWER -n -9999 -t Int16 -r near -j $NTHREAD -s $RESOLUTION $DIR_ARCHIVE/${ACQUISITION}_GAM.vrt 
 done
 
-
+# stop container
+docker stop force-container
+docker rm force-container
