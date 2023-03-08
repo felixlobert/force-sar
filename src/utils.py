@@ -113,33 +113,35 @@ def get_scenes(aoi = None, satellite = None, start_date = None, end_date = None,
     query = base_url
 
     if satellite is not None:
-        query = query + satellite + "/search.json?"
+        query += satellite + "/search.json?maxRecords=1000&"
     else:
-        query = query + "search.json?"
+        query += "search.json?maxRecords=1000&"
 
     if start_date is not None:
-        query = query + "startDate=" + start_date
+        query += "startDate=" + start_date
 
     if end_date is not None:
-        query = query + "&endDate=" + end_date
+        query += "&completionDate=" + end_date
         
     if product_type is not None:
-        query = query + "&productType=" + product_type
+        query += "&productType=" + product_type
 
     if processing_level is not None:
-        query = query + "&processingLevel=LEVEL" + processing_level
+        query += "&processingLevel=LEVEL" + processing_level
 
     if relative_orbit is not None:
-        query = query + "&relativeOrbitNumber=" + relative_orbit
+        query += "&relativeOrbitNumber=" + relative_orbit
 
     if orbit_direction is not None:
-        query = query + "&orbitDirection=" + orbit_direction.upper()
+        query += "&orbitDirection=" + orbit_direction.upper()
 
     if sensor_mode is not None:
-        query = query + "&sensorMode=" + sensor_mode
+        query += "&sensorMode=" + sensor_mode
 
     if aoi is not None:
-        query = query + "&geometry=" + aoi_wkt
+        query += "&geometry=" + aoi_wkt
+
+    query += '&sortParam=startDate'
 
     # query api and convert response to dataframe
     response = requests.get(query).json()
@@ -175,5 +177,6 @@ def get_scenes(aoi = None, satellite = None, start_date = None, end_date = None,
     # create and return geodataframe
     df['geometry'] = gpd.GeoSeries.from_wkt(df['geometry'])
     gdf = gpd.GeoDataFrame(df, geometry='geometry')
+    gdf = gdf.set_crs(epsg=4326)
 
     return gdf
