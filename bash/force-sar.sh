@@ -24,7 +24,7 @@ docker run \
     -v $FILE_TILE:$FILE_TILE \
     -v $DIR_DEM:/root/.snap/auxdata/dem/SRTM\ 1Sec\ HGT \
     -v $DIR_ORBIT:/root/.snap/auxdata/Orbits/ \
-    force-sar-py
+    force-sar
 
 # query and process data inside docker container
 docker exec force-sar-container python3 src/main.py $PRM_FILE
