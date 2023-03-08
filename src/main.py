@@ -58,15 +58,23 @@ for index, scene in scenes.iterrows():
     base_name = base_name + '_N' + n_coord + '_E' + e_coord
     fname = prm['DIR_ARCHIVE'] + '/'  + base_name + '.tif'
 
+    if os.path.exists(fname):
+        continue
+
     # create snap gpt command and execute
-    graph = '/force-sar/graphs/grd_to_gamma0.xml'
-        
-    cmd = '/usr/local/snap/bin/gpt ' + graph 
+    cmd = '/usr/local/snap/bin/gpt /force-sar/graphs/grd_to_gamma0.xml'
     cmd += ' -Pinput=' + scene['productIdentifier'] + '/manifest.safe'
     cmd += ' -Poutput=' + fname 
     cmd += ' -Pspeckle_filter=\'' + prm['SPECKLE_FILTER'].title() +'\'' 
     cmd += ' -Pfilter_size=' + prm['FILTER_SIZE'] 
     cmd += ' -Presolution=' + prm['RESOLUTION'] 
     cmd += ' -Paoi=\'' + subset + '\''
+
+    # define processing parameters
+    cmd += ' -q ' + prm['NTHREAD']
+    cmd += ' -J-Xms2G -J-Xmx' + prm['MAX_MEMORY'] + 'G -c ' + str('%g'%(float(prm['MAX_MEMORY'])*0.7)) +'G'
+    cmd += ' -Dsnap.dataio.bigtiff.compression.type=LZW'
+    cmd += ' -Dsnap.dataio.bigtiff.tiling.width=512'
+    cmd += ' -Dsnap.dataio.bigtiff.tiling.height=512'
 
     os.system(cmd)
