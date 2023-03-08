@@ -1,7 +1,12 @@
 #!/bin/bash
 
 # set command input as path for parameterfile
-PRM_FILE=$1
+if [[ "$1" = /* ]]
+then
+    PRM_FILE=$1
+else
+    PRM_FILE=$PWD/$1
+fi
 
 # grep directories from prm-file, remove whitespace and define in environment
 DIRECTORIES=$(cat $PRM_FILE | grep '^DIR\|^FORCE_GRID\|^FILE\|^RESOLUTION\|^NTHREAD' | grep -v 'NULL' | sed -r '/[^=]+=[^=]+/!d' | sed -r 's/\s+=\s/=/g')
@@ -12,13 +17,13 @@ docker run \
     -t -d \
     --name force-sar-container \
     -v $PRM_FILE:$PRM_FILE \
-    -v $FORCE_GRID:$FORCE_GRID \
     -v $DIR_ARCHIVE:$DIR_ARCHIVE \
     -v $DIR_LOWER:$DIR_LOWER \
+    -v $FORCE_GRID:$FORCE_GRID \
     -v $DIR_REPO:$DIR_REPO \
+    -v $FILE_TILE:$FILE_TILE \
     -v $DIR_DEM:/root/.snap/auxdata/dem/SRTM\ 1Sec\ HGT \
     -v $DIR_ORBIT:/root/.snap/auxdata/Orbits/ \
-    -v $FILE_TILE:$FILE_TILE \
     force-sar-py
 
 # query and process data inside docker container
@@ -42,7 +47,7 @@ docker run \
     -v $DIR_LOWER:$DIR_LOWER \
     -v $DIR_ARCHIVE:$DIR_ARCHIVE \
     -u $(id -u):$(id -g) \
-    davidfrantz/force \
+    davidfrantz/force:3.7.10 \
     /bin/bash
 
 # define unique date and orbit pairs from processed scenes
