@@ -1,6 +1,9 @@
 FROM mundialis/esa-snap:9.0-ubuntu
 
-COPY . /force-sar/
-WORKDIR /force-sar/
+ADD requirements.txt /force-sar/
+RUN pip install -r /force-sar/requirements.txt
 
-RUN pip install -r requirements.txt
+ADD . /force-sar/
+RUN pip install -e /force-sar/.
+
+WORKDIR /force-sar/
