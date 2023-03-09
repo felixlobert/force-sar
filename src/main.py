@@ -2,6 +2,8 @@ import sys
 import os
 from src import utils
 import geopandas as gpd
+import pandas as pd
+from multiprocessing import Pool
 
 
 # read prm file path from console input
@@ -29,25 +31,47 @@ force_grid = gpd.read_file(prm['FORCE_GRID'])
 force_grid = force_grid[force_grid['Tile_ID'].isin(tiles)]
 
 
-# query available scenes from api and filter for orbits from prm file
-scenes = utils.get_scenes(
-    aoi = force_grid,
-    satellite = 'Sentinel1',
-    start_date = prm['DATE_RANGE'].split(' ')[0],
-    end_date = prm['DATE_RANGE'].split(' ')[1],
-    product_type = 'GRD',
-    sensor_mode = 'IW',
-    processing_level = '1',
-    repo = prm['REPO'])
-
+# start parallel search for each orbit if orbit(s) set in prm file
 if prm['ORBITS'] != 'NULL':
-    orbits = [int(orbit) for orbit in prm['ORBITS'].split(' ')]
-    scenes = scenes[scenes['relativeOrbitNumber'].isin(orbits)]
+
+    orbits = prm['ORBITS'].split(' ')
+        
+    def get_scenes_per_orbit(orbit):
+
+        scenes = utils.get_scenes(
+        aoi = force_grid,
+        satellite = 'Sentinel1',
+        start_date = prm['DATE_RANGE'].split(' ')[0],
+        end_date = prm['DATE_RANGE'].split(' ')[1],
+        product_type = 'GRD', 
+        relative_orbit = orbit,
+        sensor_mode = 'IW',
+        processing_level = '1',
+        repo = prm['REPO'])
+
+        return scenes
+
+    # create the process pool and search for scenes in parallel
+    with Pool(int(prm['NTHREAD'])) as pool:
+        scenes = pd.concat(pool.map(get_scenes_per_orbit, orbits))
+
+else:
+
+    # query available scenes from api and filter for orbits from prm file
+    scenes = utils.get_scenes(
+        aoi = force_grid,
+        satellite = 'Sentinel1',
+        start_date = prm['DATE_RANGE'].split(' ')[0],
+        end_date = prm['DATE_RANGE'].split(' ')[1],
+        product_type = 'GRD',
+        sensor_mode = 'IW',
+        processing_level = '1',
+        repo = prm['REPO'])
 
 
 for index, scene in scenes.iterrows():
 
-    # define wkt subset as intersection between scene and tiles as processing extent 
+    # define wkt subset as bbox of intersection between scene and tiles as processing extent 
     subset = force_grid.to_crs(epsg=4326).unary_union.intersection(scene['geometry']).envelope.wkt
 
     # create file name including centroid coords of scene
