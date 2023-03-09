@@ -11,19 +11,20 @@ prm_file = sys.argv[1]
 prm = utils.read_prm(prm_file)
 
 
-# read tile list from tile file
+# find common tiles from defined range and oprional tile file
+x_range = [int(i) for i in prm['X_TILE_RANGE'].split(' ')]
+x_range = list(range(x_range[0], x_range[1] + 1))
+x_range = [str(i).zfill(4) for i in x_range]
+
+y_range = [int(i) for i in prm['Y_TILE_RANGE'].split(' ')]
+y_range = list(range(y_range[0], y_range[1] + 1))
+y_range = [str(i).zfill(4) for i in y_range]
+
+tiles = ['X' + x_tile + '_Y' + y_tile for x_tile in x_range for y_tile in y_range]
+
 if prm['FILE_TILE'] != 'NULL':
-    tiles = utils.read_til(prm['FILE_TILE'])
-else:
-    x_range = [int(i) for i in prm['X_TILE_RANGE'].split(' ')]
-    x_range = list(range(x_range[0], x_range[1] + 1))
-    x_range = [str(i).zfill(4) for i in x_range]
-
-    y_range = [int(i) for i in prm['Y_TILE_RANGE'].split(' ')]
-    y_range = list(range(y_range[0], y_range[1] + 1))
-    y_range = [str(i).zfill(4) for i in y_range]
-
-    tiles = ['X' + x_tile + '_Y' + y_tile for x_tile in x_range for y_tile in y_range]
+    tiles_file = utils.read_til(prm['FILE_TILE'])
+    tiles = set(tiles).intersection(tiles_file)
 
 
 # read and filter force grid for tile list
