@@ -38,7 +38,7 @@ scenes = utils.get_scenes(
     product_type = 'GRD',
     sensor_mode = 'IW',
     processing_level = '1',
-    codede = prm['REPO'] == 'CODEDE')
+    repo = prm['REPO'])
 
 if prm['ORBITS'] != 'NULL':
     orbits = [int(orbit) for orbit in prm['ORBITS'].split(' ')]

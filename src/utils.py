@@ -65,7 +65,7 @@ def read_til(til_file):
     return tiles
 
 
-def get_scenes(aoi = None, satellite = None, start_date = None, end_date = None, product_type = None, sensor_mode = None, relative_orbit = None, orbit_direction = None, processing_level = "1", codede = False):
+def get_scenes(aoi = None, satellite = None, start_date = None, end_date = None, product_type = None, sensor_mode = None, relative_orbit = None, orbit_direction = None, processing_level = "1", repo = 'CODEDE'):
     """Query metadata for available satellite imagery in the repositories of CODE-DE and Creodias.
 
     None of the parameters are mandatory.
@@ -90,8 +90,8 @@ def get_scenes(aoi = None, satellite = None, start_date = None, end_date = None,
         Orbit direction: ascending or descending (S1 only).
     processing_level: str
         1 for GRD, SLC, etc., 2 for CARD-BS.
-    codede: bool
-        Use CODE-DE repository (Germany only) of Creodias.
+    repo: str
+        Use CODE-DE repository (Germany only; default) or Creodias ['CODEDE', 'CREODIAS'].
     
     Returns
     -------
@@ -104,7 +104,7 @@ def get_scenes(aoi = None, satellite = None, start_date = None, end_date = None,
     aoi_wkt = shape_convex_hull.wkt
 
     # define api to use
-    if codede:
+    if repo == 'CODEDE':
         base_url = "https://finder.code-de.org/resto/api/collections/"
     else:
         base_url = "https://datahub.creodias.eu/resto/api/collections/"
