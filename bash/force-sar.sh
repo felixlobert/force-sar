@@ -68,5 +68,5 @@ do
 done
 
 # stop container
-docker stop force-container
-docker rm force-container
+docker stop force-sar-container
+docker rm force-sar-container
