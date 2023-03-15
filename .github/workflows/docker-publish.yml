@@ -32,4 +32,4 @@ jobs:
         uses: docker/build-push-action@v4
         with:
           push: true
-          tags: felixlobert/force-sar:$VERSION
+          tags: felixlobert/force-sar:$IMG_TAG
