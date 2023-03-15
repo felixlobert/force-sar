@@ -7,3 +7,6 @@ ADD . /force-sar/
 RUN pip install -e /force-sar/.
 
 WORKDIR /force-sar/
+
+RUN chmod +x /force-sar/bin/*
+RUN ln -s /force-sar/bin/* /usr/local/bin/
