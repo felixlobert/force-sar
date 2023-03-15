@@ -2,13 +2,17 @@ name: docker build and publish
 
 on:
   push:
-    branches:
-      - 'dev'
+    branches: [main, dev]
 
 jobs:
   docker:
     runs-on: ubuntu-latest
     steps:
+      -
+        name: define image tag
+        run: |
+          [ "$GITHUB_REF_NAME" == "main" ] && IMG_TAG=latest
+          [ "$GITHUB_REF_NAME" == "dev" ] && IMG_TAG=dev
       -
         name: Set up QEMU
         uses: docker/setup-qemu-action@v2
@@ -26,4 +30,4 @@ jobs:
         uses: docker/build-push-action@v4
         with:
           push: true
-          tags: felixlobert/force-sar:dev
+          tags: felixlobert/force-sar:$VERSION
