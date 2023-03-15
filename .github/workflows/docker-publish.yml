@@ -11,8 +11,10 @@ jobs:
       -
         name: define image tag
         run: |
+          echo GITHUB_REF_NAME=$GITHUB_REF_NAME
           [ "$GITHUB_REF_NAME" == "main" ] && IMG_TAG=latest
           [ "$GITHUB_REF_NAME" == "dev" ] && IMG_TAG=dev
+          echo IMG_TAG=$IMG_TAG
       -
         name: Set up QEMU
         uses: docker/setup-qemu-action@v2
