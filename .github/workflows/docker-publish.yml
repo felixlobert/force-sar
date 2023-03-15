@@ -10,6 +10,7 @@ jobs:
     steps:
       -
         name: define image tag
+        id: vars
         run: |
           echo GITHUB_REF_NAME=$GITHUB_REF_NAME
           [ "$GITHUB_REF_NAME" == "main" ] && IMG_TAG=latest
