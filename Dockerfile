@@ -1,14 +1,17 @@
 FROM mundialis/esa-snap:9.0-ubuntu
 
-ADD requirements.txt /force-sar/
-RUN pip install -r /force-sar/requirements.txt
+RUN useradd --create-home --shell /bin/bash force-sar
+WORKDIR /home/force-sar
 
-ADD . /force-sar/
-RUN pip install -e /force-sar/.
+COPY requirements.txt ./
+RUN pip install --no-cache-dir -r requirements.txt
 
-WORKDIR /force-sar/
+COPY . .
+RUN pip install -e .
 
-RUN chmod +x /force-sar/bin/*
-RUN ln -s /force-sar/bin/* /usr/local/bin/
+RUN chmod +x bin/*
+RUN cp bin/* /usr/local/bin/
 
-ENTRYPOINT ["/bin/bash", "-c"]
+USER force-sar
+
+ENTRYPOINT [ "force-sar" ]
