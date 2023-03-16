@@ -10,3 +10,5 @@ WORKDIR /force-sar/
 
 RUN chmod +x /force-sar/bin/*
 RUN ln -s /force-sar/bin/* /usr/local/bin/
+
+ENTRYPOINT [ "/bin/bash" ]
