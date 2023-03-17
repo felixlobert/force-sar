@@ -2,7 +2,9 @@ import geopandas as gpd
 import pandas as pd
 import requests
 from shapely import wkt
-import os
+import json
+import tempfile
+import asf_search
 
 
 def read_prm(prm_file):
@@ -65,7 +67,7 @@ def read_til(til_file):
     return tiles
 
 
-def get_scenes(aoi = None, satellite = None, start_date = None, end_date = None, product_type = None, sensor_mode = None, relative_orbit = None, orbit_direction = None, processing_level = "1", repo = 'CODEDE'):
+def get_scenes_creodias(aoi = None, satellite = None, start_date = None, end_date = None, product_type = None, sensor_mode = None, relative_orbit = None, orbit_direction = None, repo = 'CODEDE'):
     """Query metadata for available satellite imagery in the repositories of CODE-DE and Creodias.
 
     None of the parameters are mandatory.
@@ -88,8 +90,6 @@ def get_scenes(aoi = None, satellite = None, start_date = None, end_date = None,
         Number of relative orbit (S1 only).
     orbit_direction: str
         Orbit direction: ascending or descending (S1 only).
-    processing_level: str
-        1 for GRD, SLC, etc., 2 for CARD-BS.
     repo: str
         Use CODE-DE repository (Germany only; default) or Creodias ['CODEDE', 'CREODIAS'].
     
@@ -126,9 +126,6 @@ def get_scenes(aoi = None, satellite = None, start_date = None, end_date = None,
     if product_type is not None:
         query += "&productType=" + product_type
 
-    if processing_level is not None:
-        query += "&processingLevel=LEVEL" + processing_level
-
     if relative_orbit is not None:
         query += "&relativeOrbitNumber=" + relative_orbit
 
@@ -142,6 +139,7 @@ def get_scenes(aoi = None, satellite = None, start_date = None, end_date = None,
         query += "&geometry=" + aoi_wkt
 
     query += '&sortParam=startDate'
+    query += "&processingLevel=LEVEL1"
 
     # query api and convert response to dataframe
     response = requests.get(query).json()
@@ -153,7 +151,6 @@ def get_scenes(aoi = None, satellite = None, start_date = None, end_date = None,
         'properties.relativeOrbitNumber': 'relativeOrbitNumber',
         'properties.orbitDirection': 'orbitDirection',
         'properties.productType': 'productType',
-        'properties.processingLevel': 'processingLevel',
         'properties.platform': 'platform',
         'properties.sensorMode': 'sensorMode',
         'properties.centroid.coordinates': 'centroidCoordinates',
@@ -178,5 +175,76 @@ def get_scenes(aoi = None, satellite = None, start_date = None, end_date = None,
     df['geometry'] = gpd.GeoSeries.from_wkt(df['geometry'])
     gdf = gpd.GeoDataFrame(df, geometry='geometry')
     gdf = gdf.set_crs(epsg=4326)
+
+    return gdf
+
+
+def get_scenes_asf(aoi = None, start_date = None, end_date = None, relative_orbit = None, orbit_direction = None):
+    """Query metadata for available satellite imagery from Alaska Satellite Facility.
+
+    None of the parameters are mandatory.
+
+    Parameters
+    ----------
+    aoi : geodataframe
+        GeoPandas GeoDataFrame defining the geographical extent of the query.
+    start_date: str
+        Start of query DD-MM-YYY.
+    end_date: str
+        End of query DD-MM-YYY.
+    relative_Orbit: str
+        Number of relative orbit.
+    orbit_direction: str
+        Orbit direction: ascending or descending (S1 only).
+    
+    Returns
+    -------
+    geodataframe
+        Containing metadata and footprint of images matching the query.
+
+    """
+    # define aoi as wkt string
+    shape_convex_hull = aoi.to_crs(epsg=4326).unary_union.convex_hull
+    aoi_wkt = shape_convex_hull.wkt
+
+    # format orbit direction if set
+    if orbit_direction is not None:
+        orbit_direction = orbit_direction.upper()
+
+    # define functions parameter that are not none
+    params = {
+        'intersectsWith': aoi_wkt,
+        'start': start_date,
+        'end': end_date,
+        'relativeOrbit': relative_orbit,
+        'flightDirection': orbit_direction
+    }
+    params = {k:v for k, v in params.items() if v is not None}
+
+    results = asf_search.search(platform='Sentinel-1', 
+                         processingLevel='GRD_HD', 
+                         beamMode='IW',
+                         **params)
+
+    fp = tempfile.NamedTemporaryFile(mode='w')
+    with open(fp.name, "w", encoding='utf-8') as f:
+        json.dump(results.geojson(), f, ensure_ascii=False, indent=4) 
+    gdf = gpd.read_file(fp.name).set_crs(epsg=4326)
+
+    # subset columns
+    columns_subset = {
+        'stopTime': 'date',
+        'pathNumber': 'relativeOrbitNumber',
+        'flightDirection': 'orbitDirection',
+        'processingLevel': 'productType',
+        'platform': 'platform',
+        'beamModeType': 'sensorMode',
+        'centerLon': 'centroidLon',
+        'centerLat': 'centroidLat',
+        'url': 'productIdentifier',
+        'geometry': 'geometry'
+    }
+
+    gdf = gdf.rename(columns=columns_subset)[[*columns_subset.values()]]
 
     return gdf

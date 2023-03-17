@@ -36,42 +36,71 @@ def query(prm_file, out_path):
     force_grid = force_grid[force_grid['Tile_ID'].isin(tiles)]
 
 
-    # start parallel search for each orbit if orbit(s) set in prm file
-    if prm['ORBITS'] != 'NULL':
+    # if asf api is chosen
+    if prm['REPO'] == 'ASF':
 
-        orbits = prm['ORBITS'].split(' ')
+        # start parallel search for each orbit if orbit(s) set in prm file
+        if prm['ORBITS'] != 'NULL':
+
+            orbits = prm['ORBITS'].split(' ')
+                
+            def get_scenes_per_orbit(orbit):
+
+                scenes = utils.get_scenes_asf(
+                aoi = force_grid,
+                start_date = prm['DATE_RANGE'].split(' ')[0],
+                end_date = prm['DATE_RANGE'].split(' ')[1],
+                relative_orbit = orbit)
+
+                return scenes
+
+            # create the process pool and search for scenes in parallel
+            with Pool(int(prm['NTHREAD'])) as pool:
+                scenes = pd.concat(pool.map(get_scenes_per_orbit, orbits))
+
+        else:
+
+            # query available scenes from api and filter for orbits from prm file
+            scenes = utils.get_scenes_asf(
+                aoi = force_grid,
+                start_date = prm['DATE_RANGE'].split(' ')[0],
+                end_date = prm['DATE_RANGE'].split(' ')[1])
             
-        def get_scenes_per_orbit(orbit):
+    else:        
+        # start parallel search for each orbit if orbit(s) set in prm file
+        if prm['ORBITS'] != 'NULL':
 
-            scenes = utils.get_scenes(
-            aoi = force_grid,
-            satellite = 'Sentinel1',
-            start_date = prm['DATE_RANGE'].split(' ')[0],
-            end_date = prm['DATE_RANGE'].split(' ')[1],
-            product_type = 'GRD', 
-            relative_orbit = orbit,
-            sensor_mode = 'IW',
-            processing_level = '1',
-            repo = prm['REPO'])
+            orbits = prm['ORBITS'].split(' ')
+                
+            def get_scenes_per_orbit(orbit):
 
-            return scenes
+                scenes = utils.get_scenes_creodias(
+                aoi = force_grid,
+                satellite = 'Sentinel1',
+                start_date = prm['DATE_RANGE'].split(' ')[0],
+                end_date = prm['DATE_RANGE'].split(' ')[1],
+                product_type = 'GRD', 
+                relative_orbit = orbit,
+                sensor_mode = 'IW',
+                repo = prm['REPO'])
 
-        # create the process pool and search for scenes in parallel
-        with Pool(int(prm['NTHREAD'])) as pool:
-            scenes = pd.concat(pool.map(get_scenes_per_orbit, orbits))
+                return scenes
 
-    else:
+            # create the process pool and search for scenes in parallel
+            with Pool(int(prm['NTHREAD'])) as pool:
+                scenes = pd.concat(pool.map(get_scenes_per_orbit, orbits))
 
-        # query available scenes from api and filter for orbits from prm file
-        scenes = utils.get_scenes(
-            aoi = force_grid,
-            satellite = 'Sentinel1',
-            start_date = prm['DATE_RANGE'].split(' ')[0],
-            end_date = prm['DATE_RANGE'].split(' ')[1],
-            product_type = 'GRD',
-            sensor_mode = 'IW',
-            processing_level = '1',
-            repo = prm['REPO'])
+        else:
+
+            # query available scenes from api and filter for orbits from prm file
+            scenes = utils.get_scenes_creodias(
+                aoi = force_grid,
+                satellite = 'Sentinel1',
+                start_date = prm['DATE_RANGE'].split(' ')[0],
+                end_date = prm['DATE_RANGE'].split(' ')[1],
+                product_type = 'GRD',
+                sensor_mode = 'IW',
+                repo = prm['REPO'])
 
 
     scenes.to_file(out_path + 'scenes.geojson', driver='GeoJSON')
