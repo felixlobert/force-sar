@@ -5,6 +5,8 @@ from shapely import wkt
 import json
 import tempfile
 import asf_search
+import zipfile
+from xml.dom import minidom
 
 
 def read_prm(prm_file):
@@ -248,3 +250,44 @@ def get_scenes_asf(aoi = None, start_date = None, end_date = None, relative_orbi
     gdf = gdf.rename(columns=columns_subset)[[*columns_subset.values()]]
 
     return gdf
+
+
+def get_metadata(filepath):
+    """Get metadata for a zipped S1 scene.
+
+    Parameters
+    ----------
+    filepath : str
+        Path to zipped S1 scene.
+    
+    Returns
+    -------
+    tuple
+        date, platform, direction, e_coord, n_coord
+
+    """
+    # open manifest.safe from zipped S1 scene
+    archive = zipfile.ZipFile(filepath, 'r')    
+    manifest = archive.open(os.path.basename(filepath)[:-4] + '.SAFE/manifest.safe')
+    dom = minidom.parse(manifest)
+    
+    # derive metadat from filename
+    date = os.path.basename(filepath)[17:25]
+    platform = os.path.basename(filepath)[0:2]
+        
+    # derive metadat from xml
+    direction = dom.getElementsByTagName('s1:pass')[0].firstChild.nodeValue
+    
+    coords = dom.getElementsByTagName('gml:coordinates')[0].firstChild.nodeValue
+    coords = coords + ' ' + coords.split(' ')[0]
+    coords = coords.replace(',',';')
+    coords = coords.replace(' ',', ')
+    coords = coords.replace(';',' ')
+    coords = 'POLYGON((' + coords + '))'
+
+    polygon = shapely.wkt.loads(coords)
+
+    e_coord = str('%g'%(round(polygon.centroid.coords[0][1]* 10, 0))).zfill(4)
+    n_coord = str('%g'%(round(polygon.centroid.coords[0][0]* 10, 0))).zfill(4)
+    
+    return date, platform, direction, e_coord, n_coord
