@@ -1,0 +1,58 @@
+#!/usr/bin/python3
+import os
+from src import utils
+import geopandas as gpd
+import click
+import shapely
+
+
+@click.command()
+@click.argument('query_file', type=click.Path(exists=True))
+@click.argument('prm_file', type=click.Path(exists=True))
+@click.argument('LEVEL1', type=click.Path(exists=True))
+@click.argument('LEVEL2', type=click.Path(exists=True))
+
+def process(query_file, prm_file):
+    
+    prm = utils.read_prm(prm_file)
+
+    scenes = gpd.read_file(query_file)
+
+    for index, scene in scenes.iterrows():
+        """Process S1 GRD data from LEVEL1 directory to gamma0 and store as LEVEL2"""
+
+        # define wkt subset as bbox of intersection between scene and tiles as processing extent 
+        subset = force_grid.to_crs(epsg=4326).unary_union.intersection(scene['geometry']).envelope.wkt
+
+        # create file name including centroid coords of scene
+        date = scene['date'][0:10].replace('-', '')
+        base_name = date + '_LEVEL2_' + scene['platform'] + 'I' + scene['orbitDirection'][0] + '_SIG'
+        e_coord = str('%g'%(round(scene['centroidLon'] * 10, 0))).zfill(4)
+        n_coord = str('%g'%(round(scene['centroidLat'] * 10, 0))).zfill(4)
+        base_name = base_name + '_N' + n_coord + '_E' + e_coord
+        fname = prm['DIR_ARCHIVE'] + '/'  + base_name + '.tif'
+
+        if os.path.exists(fname):
+            continue
+
+        # create snap gpt command and execute
+        cmd = '/usr/local/snap/bin/gpt /force-sar/graphs/grd_to_gamma0.xml'
+        cmd += ' -Pinput=' + scene['productIdentifier'] + '/manifest.safe'
+        cmd += ' -Poutput=' + fname 
+        cmd += ' -Pspeckle_filter=\'' + prm['SPECKLE_FILTER'].title() +'\'' 
+        cmd += ' -Pfilter_size=' + prm['FILTER_SIZE'] 
+        cmd += ' -Presolution=' + prm['RESOLUTION'] 
+        cmd += ' -Paoi=\'' + subset + '\''
+
+        # define processing parameters
+        cmd += ' -q ' + prm['NTHREAD']
+        cmd += ' -J-Xms2G -J-Xmx' + prm['MAX_MEMORY'] + 'G -c ' + str('%g'%(float(prm['MAX_MEMORY'])*0.7)) +'G'
+        cmd += ' -Dsnap.dataio.bigtiff.compression.type=LZW'
+        cmd += ' -Dsnap.dataio.bigtiff.tiling.width=512'
+        cmd += ' -Dsnap.dataio.bigtiff.tiling.height=512'
+
+        os.system(cmd)
+
+
+if __name__ == '__main__':
+    process()
