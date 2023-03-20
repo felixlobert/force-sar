@@ -1,9 +1,11 @@
 #!/usr/bin/python3
+
 import os
 from src import utils
 import geopandas as gpd
+import pandas as pd
+from multiprocessing.pool import ThreadPool as Pool
 import click
-
 
 @click.command()
 @click.argument('prm_file', type=click.Path(exists=True))
@@ -28,12 +30,11 @@ def process(prm_file):
         tiles_file = utils.read_til(prm['FILE_TILE'])
         tiles = set(tiles).intersection(tiles_file)
 
-
     # read and filter force grid for tile list
     force_grid = gpd.read_file(prm['FORCE_GRID'])
     force_grid = force_grid[force_grid['Tile_ID'].isin(tiles)]
 
-    if prm['REPO'] == 'ASF':
+    if prm['DATA_SOURCE'] == 'ASF':
 
         files_level0 = os.listdir(prm['DIR_LEVEL0'])
         files_level0 = [prm['DIR_LEVEL0'] + i for i in files_level0]
@@ -88,7 +89,7 @@ def process(prm_file):
                 product_type = 'GRD', 
                 relative_orbit = orbit,
                 sensor_mode = 'IW',
-                repo = prm['REPO'])
+                repo = prm['DATA_SOURCE'])
 
                 return scenes
 
@@ -106,7 +107,7 @@ def process(prm_file):
                 end_date = prm['DATE_RANGE'].split(' ')[1],
                 product_type = 'GRD',
                 sensor_mode = 'IW',
-                repo = prm['REPO'])
+                repo = prm['DATA_SOURCE'])
 
         for index, scene in scenes.iterrows():
 

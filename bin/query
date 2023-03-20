@@ -37,7 +37,7 @@ def query(prm_file, out_path):
 
 
     # if asf api is chosen
-    if prm['REPO'] == 'ASF':
+    if prm['DATA_SOURCE'] == 'ASF':
 
         # start parallel search for each orbit if orbit(s) set in prm file
         if prm['ORBITS'] != 'NULL':
@@ -82,7 +82,7 @@ def query(prm_file, out_path):
                 product_type = 'GRD', 
                 relative_orbit = orbit,
                 sensor_mode = 'IW',
-                repo = prm['REPO'])
+                repo = prm['DATA_SOURCE'])
 
                 return scenes
 
@@ -100,7 +100,7 @@ def query(prm_file, out_path):
                 end_date = prm['DATE_RANGE'].split(' ')[1],
                 product_type = 'GRD',
                 sensor_mode = 'IW',
-                repo = prm['REPO'])
+                repo = prm['DATA_SOURCE'])
 
 
     scenes.to_file(out_path + 'scenes.geojson', driver='GeoJSON')
