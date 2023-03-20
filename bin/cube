@@ -1,0 +1,52 @@
+#!/usr/bin/python3
+
+import os
+from src import utils
+import click
+from glob import glob
+
+@click.command()
+@click.argument('prm_file', type=click.Path(exists=True))
+
+def cube(prm_file):
+    """Cube processed S1 data into existing data cube as specified in PRM_FILE"""
+
+    prm_file = '/home/eouser/projects/force-sar/test/prm_file.prm'
+    prm = utils.read_prm(prm_file)
+
+    acquisitions=os.listdir(prm['DIR_LEVEL1'])
+    acquisitions=[i.split('_SIG')[0] for i in acquisitions]
+    acquisitions=sorted([*{*acquisitions}])
+
+    docker_cmd = 'docker run'
+    docker_cmd += ' -t -d --name force-container'
+    if prm['DIR_LEVEL1'][0] == '/':
+        docker_cmd += ' -v ' + prm['DIR_LEVEL1'] + ':' + prm['DIR_LEVEL1']
+        docker_cmd += ' -v ' + prm['DIR_LEVEL2'] + ':' + prm['DIR_LEVEL2']
+    else:
+        docker_cmd += ' -v ' + os.getcwd() + '/' + prm['DIR_LEVEL1'] + ':' + os.getcwd() + '/' + prm['DIR_LEVEL1']
+        docker_cmd += ' -v ' + os.getcwd() + '/' + prm['DIR_LEVEL2'] + ':' + os.getcwd() + '/' + prm['DIR_LEVEL2']
+    docker_cmd += ' -w ' + os.getcwd() + '/'
+    docker_cmd += ' davidfrantz/force /bin/bash'
+    os.system(docker_cmd)
+
+    for acquisition in acquisitions:
+
+        vrt_cmd = 'docker exec force-container gdalbuildvrt'
+        vrt_cmd += ' -vrtnodata -9999 -srcnodata -9999 '
+        vrt_cmd += prm['DIR_LEVEL1'] + '/' + acquisition + '_GAM.vrt '
+        vrt_cmd += ' '.join(glob(os.path.join(prm['DIR_LEVEL1'], acquisition+'*.tif')))
+        os.system(vrt_cmd)
+
+        cube_cmd = 'docker exec force-container force-cube'
+        cube_cmd += ' -o ' + prm['DIR_LEVEL2'] 
+        cube_cmd += ' -n -9999 -t Int16 -r near'
+        cube_cmd += ' -j ' + prm['NTHREAD'] + ' -s ' + prm['RESOLUTION']
+        cube_cmd += ' ' + prm['DIR_LEVEL1'] + '/' + acquisition + '_GAM.vrt'
+        os.system(cube_cmd)
+
+    os.system('docker stop force-container')
+    os.system('docker rm force-container')
+
+if __name__ == '__main__':
+    cube()

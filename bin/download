@@ -1,0 +1,30 @@
+#!/usr/bin/python3
+
+from src import utils
+import geopandas as gpd
+import asf_search as asf
+import click
+
+@click.command()
+@click.argument('prm_file', type=click.Path(exists=True))
+@click.argument('query_file', type=click.Path(exists=True))
+@click.option("--username", prompt=True, hide_input=False, confirmation_prompt=False)
+@click.option("--password", prompt=True, hide_input=True, confirmation_prompt=False)
+
+def download(prm_file, query_file, username, password):
+    """Download satellite data from ASF defined in a QUERY_FILE to a defined OUT_PATH"""
+    
+    prm = utils.read_prm(prm_file)
+
+    query_file = gpd.read_file(query_file)
+
+    session = asf.ASFSession().auth_with_creds(username, password)
+
+    asf.download_urls(urls=query_file.productIdentifier,
+                      path=prm['DIR_LEVEL0'],
+                      processes=4,
+                      session=session)
+
+
+if __name__ == '__main__':
+    download()

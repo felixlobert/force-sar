@@ -1,3 +1,4 @@
-pandas
-geopandas
-requests
+pandas==1.1.5
+geopandas==0.9.0
+requests==2.27.1
+asf_search==6.0.0

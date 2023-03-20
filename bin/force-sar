@@ -1,0 +1,46 @@
+#!/bin/bash
+
+# function to check if string exists in list
+function exists_in_list() {
+    LIST=$1
+    DELIMITER=$2
+    VALUE=$3
+    LIST_WHITESPACES=`echo $LIST | tr "$DELIMITER" " "`
+    for x in $LIST_WHITESPACES; do
+        if [ "$x" = "$VALUE" ]; then
+            return 0
+        fi
+    done
+    return 1
+}
+
+
+# check if first arg is a force-sar function - show help if not
+if exists_in_list "query download process cube" " " $1; then
+    
+    # pass full command if force-sar function is detected
+    $@
+
+else
+    
+    if ! [ -z "$1" ]; then
+    echo error: command $1 not available in FORCE-SAR!
+    fi
+    
+    echo 
+    echo Welcome! You are using FORCE-SAR
+    echo 
+    echo FORCE-SAR integrates Sentinel-1 Synthetic Radar Aperture imagery into the 
+    echo Framework for Operational Radiometric Correction for Environmental monitoring
+    echo by David Frantz, david.frantz@geo.hu-berlin.de
+    echo + many community contributions.
+    echo 
+    echo FORCE-SAR consists of the following components:
+    echo 
+    echo + query$'\t'$'\t'Query scenes matching given criteria from CODEDE/CREODIAS/ASF
+    echo + download$'\t'Donwload the queried scenes from Alaska Satellite Facility
+    echo + process$'\t'Process data previously downloaded or directly from the repository 
+    echo + cube$'\t'$'\t'Cube the processed data into an existing FORCE data cube
+    echo
+
+fi
