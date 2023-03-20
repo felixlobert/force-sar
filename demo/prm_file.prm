@@ -2,31 +2,28 @@
 
 # INPUT/OUTPUT DIRECTORIES
 # ------------------------------------------------------------------------
-# Archive datapool (directory to store processed scenes)
+# Download datapool (directory to store downloaded S1 data, only needed if
+# ASF is used as data source, set to NULL otherwise)
 # Type: full directory path
-DIR_ARCHIVE = data/sar_archive/
-# Lower Level datapool (directory to store tiled data)
+DIR_LEVEL0 = data/LEVEL0/
+# Intermediate datapool (directory to store processed but not yet cubed 
+# S1 data)
 # Type: full directory path
-DIR_LOWER = data/sar_cube/
+DIR_LEVEL1 = data/LEVEL1/
+# ARD datapool (directory to store tiled data)
+# Type: full directory path
+DIR_LEVEL2 = data/LEVEL2/
 # FORCE-Grid (path to vector geometry of the used grid, can be created 
-# with force-tabulate grid)
+# with force-tabulate-grid)
 # Type: full file path
-FORCE_GRID = projects/force-sar/example/force_grid.gpkg
+FORCE_GRID = demo/force_grid.gpkg
 
-# DIAS CONFIGURATION
+# DATA SOURCE CONFIGURATION
 # ------------------------------------------------------------------------
-# Satellite data repository to use.
-# Type: Character list. Valid values: {CODEDE,CREODIAS}
-REPO = CREODIAS
-# Mountpoint of satellite data repository.
-# Type: full file path
-DIR_REPO = /eodata
-# Directory of SRTM 1Sec HGT DEM
-# Type: full directory path
-DIR_DEM = /eodata/auxdata/SRTMGL1/dem
-# Directory of S1 orbit files
-# Type: full directory path
-DIR_ORBIT = /eodata/auxdata/orbits
+# Satellite data repository to use. If you are not connected to CODE-DE or
+# CREODIAS, choose ASF to download the S1 data.
+# Type: Character list. Valid values: {CODEDE,CREODIAS,ASF}
+DATA_SOURCE = ASF
 
 # PARALLEL PROCESSING
 # ------------------------------------------------------------------------
@@ -43,14 +40,14 @@ MAX_MEMORY = 110
 # A shapefile of the tiles can be generated with force-tabulate-grid
 # Type: Integer list. Valid range: [-999,9999]
 X_TILE_RANGE = 66 66
-Y_TILE_RANGE = 45 45
+Y_TILE_RANGE = 45 46
 # Allow-list of tiles. Can be used to further limit the analysis extent to
 # non-square extents. The allow-list is intersected with the analysis extent,
 # i.e. only tiles included in both the analysis extent AND the allow-list will
 # be processed.
 # Optional. If NULL, the complete analysis extent is processed
 # Type: full file path
-FILE_TILE = example/file_tile.til
+FILE_TILE = demo/file_tile.til
 # Analysis resolution. The tile (and block) size must be dividable by this
 # resolution without remainder, e.g. 30m resolution with 100km tiles is not possible
 # Type: Double. Valid range: ]0,BLOCK_SIZE]
@@ -76,7 +73,7 @@ ORBITS = 44
 # Time extent for the analysis. All data between these dates will be used in
 # the analysis.
 # Type: Date list. Format: YYYY-MM-DD
-DATE_RANGE = 2020-01-01 2020-01-06
+DATE_RANGE = 2020-01-01 2020-01-30
 # DOY range for filtering the time extent. Day-of-Years that are outside of
 # the given interval will be ignored. Example: DATE_RANGE = 2010-01-01 
 # 2019-12-31, DOY_RANGE = 91 273 will use all April-Sepember observations from
@@ -89,10 +86,10 @@ DOY_RANGE = 1 365
 # BACKSCATTER-COEFFICIENT PROCESSING
 # ------------------------------------------------------------------------
 # Mode of radiometric correction applied to the data
-# Type: Character. Valid values: {GAMMA, BETA, SIGMA}
+# Type: Character. Valid values: {GAMMA}
 RADIOMETRIC_CORRECTION = GAMMA
 # Which Speckle-Filter should be applied?
-# Type: Character. Valid values: {BOXCAR, MEDIAN,  FROST, GAMMA MAP, LEE, REFINED LEE, LEE SIGMA}
+# Type: Character. Valid values: {BOXCAR, MEDIAN, FROST, GAMMA MAP, LEE, REFINED LEE, LEE SIGMA}
 SPECKLE_FILTER = REFINED LEE
 FILTER_SIZE = 3
 
