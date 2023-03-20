@@ -1,5 +1,6 @@
 #!/bin/bash
 
+# function to check if string exists in list
 function exists_in_list() {
     LIST=$1
     DELIMITER=$2
@@ -13,12 +14,19 @@ function exists_in_list() {
     return 1
 }
 
+
+# check if first arg is a force-sar function - show help if not
 if exists_in_list "query download process cube" " " $1; then
+    
+    # pass full command if force-sar function is detected
     $@
+
 else
+    
     if ! [ -z "$1" ]; then
     echo error: command $1 not available in FORCE-SAR!
     fi
+    
     echo 
     echo Welcome! You are using FORCE-SAR
     echo 
@@ -34,4 +42,5 @@ else
     echo + process$'\t'Process data previously downloaded or directly from the repository 
     echo + cube$'\t'$'\t'Cube the processed data into an existing FORCE data cube
     echo
+
 fi
