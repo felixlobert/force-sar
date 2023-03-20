@@ -14,7 +14,6 @@ RUN apt-get -y install curl && curl -fsSL https://get.docker.com | sh
 # add user and give docker sock permission
 RUN useradd --create-home --shell /bin/bash force-sar
 RUN usermod -aG docker force-sar
-# RUN chmod 666 /var/run/docker.sock
 WORKDIR /home/force-sar
 
 # install python dependencies
@@ -30,4 +29,4 @@ RUN chmod +x bin/*
 RUN cp bin/* /usr/local/bin/
 
 USER force-sar
-# ENTRYPOINT [ "force-sar" ]
+ENTRYPOINT [ "force-sar" ]
