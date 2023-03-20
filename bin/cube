@@ -1,9 +1,9 @@
 #!/usr/bin/python3
+
 import os
 from src import utils
 import click
 from glob import glob
-
 
 @click.command()
 @click.argument('prm_file', type=click.Path(exists=True))
