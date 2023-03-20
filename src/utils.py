@@ -2,11 +2,13 @@ import geopandas as gpd
 import pandas as pd
 import requests
 from shapely import wkt
+import shapely
 import json
 import tempfile
 import asf_search
 import zipfile
 from xml.dom import minidom
+import os
 
 
 def read_prm(prm_file):
@@ -280,9 +282,9 @@ def get_metadata(filepath):
     
     coords = dom.getElementsByTagName('gml:coordinates')[0].firstChild.nodeValue
     coords = coords + ' ' + coords.split(' ')[0]
-    coords = coords.replace(',',';')
-    coords = coords.replace(' ',', ')
-    coords = coords.replace(';',' ')
+    coords = coords.replace(',',' ')
+    coords = coords.split(' ')
+    coords = ', '.join([coords[i] + ' ' + coords[i-1] for i in (1,3,5,7,9)])
     coords = 'POLYGON((' + coords + '))'
 
     polygon = shapely.wkt.loads(coords)
@@ -290,4 +292,4 @@ def get_metadata(filepath):
     e_coord = str('%g'%(round(polygon.centroid.coords[0][1]* 10, 0))).zfill(4)
     n_coord = str('%g'%(round(polygon.centroid.coords[0][0]* 10, 0))).zfill(4)
     
-    return date, platform, direction, e_coord, n_coord
+    return date, platform, direction, e_coord, n_coord, polygon
