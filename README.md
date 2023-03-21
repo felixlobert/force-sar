@@ -15,7 +15,7 @@ force-sar consists of four main components:
 2. download
     - In case you don't have access to a mounted satellite data repository, this module downloads the queried S1 scenes from ASF using your user credentials. The downloaded products will be stored in a Level 0 unprocessed product archive.
 3. process
-    - Now [esa SNAP](https://hub.docker.com/r/mundialis/esa-snap) takes over the processing of the downloaded or mounted S1 data with a pre-built but easily customizable S1-GRD to $\gamma^0$ workflow. Within the processing workflow, the S1 data is already subsetted to match the extent of your defined data cube extent to save disk space when working with small study areas. Processed data will be stored in a Level 1 processed but not yet tiled archive.
+    - Now [esa SNAP](https://hub.docker.com/r/mundialis/esa-snap) takes over the processing of the downloaded or mounted S1 data with a pre-built but easily customizable S1-GRD to $\gamma^0$ workflow (`graphs/grd_to_gamma0.xml`). Within the processing workflow, the S1 data is already subsetted to match the extent of your defined data cube extent to save disk space when working with small study areas. Processed data will be stored in a Level 1 processed but not yet tiled archive.
 4. cube
     - In this last module, the power of gdal vrts and the FORCE built-in force-cube functionality are used to seamlessly integrate the processed S1 data into your datacube.
 
@@ -32,19 +32,17 @@ It might be handy to add this or a similar alias to your ~/.bashrc for a more co
 ```bash
 alias dforce-sar=' \
   docker run \
-  -v $PWD:$PWD \
-  --user "$(id -u):$(id -g)" \
+  -u "$(id -u):$(id -g)" \
   -v /var/run/docker.sock:/var/run/docker.sock \
   -v /etc/group:/etc/group:ro \
   --group-add $(stat -c '%g' /var/run/docker.sock) \
-  -w $PWD \
   -ti \
   --rm \
   felixlobert/force-sar'
 ```
 Note that it is important to mount your docker.sock to the container since force-sar itself needs to start a docker container with davidfrantz/force during the cubing module.
 
-The usage of the force-sar functions is quite similar to using FORCE. You prepare a parameter file that is then simply provided to one of the functions. An example parameter file can be found under `example/prm_file.prm`. To see a short description and which arguments and options are needed by a function, simply add `--help` to the command, e.g.:
+The usage of the force-sar functions is quite similar to using FORCE. You prepare a parameter file that is then simply provided to one of the functions. An example parameter file can be found under `demo/prm_file.prm`. To see a short description and which arguments and options are needed by a function, simply add `--help` to the command, e.g.:
 ```bash
 dforce-sar query --help
 ```
