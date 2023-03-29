@@ -14,7 +14,7 @@ def cube(prm_file):
     prm = utils.read_prm(prm_file)
 
     acquisitions=os.listdir(prm['DIR_LEVEL1'])
-    acquisitions=[i.split('_SIG')[0] for i in acquisitions]
+    acquisitions=[i.split('_GAM')[0] for i in acquisitions]
     acquisitions=sorted([*{*acquisitions}])
 
     docker_cmd = 'docker run'
