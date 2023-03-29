@@ -120,7 +120,7 @@ def process(prm_file):
             e_coord = str('%g'%(round(scene['centroidLon'] * 10, 0))).zfill(4)
             n_coord = str('%g'%(round(scene['centroidLat'] * 10, 0))).zfill(4)
             base_name = base_name + '_N' + n_coord + '_E' + e_coord
-            fname = prm['DIR_ARCHIVE'] + '/'  + base_name + '.tif'
+            fname = prm['DIR_LEVEL1'] + '/'  + base_name + '.tif'
 
             if os.path.exists(fname):
                 continue
