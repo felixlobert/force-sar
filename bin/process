@@ -116,7 +116,7 @@ def process(prm_file):
 
             # create file name including centroid coords of scene
             date = scene['date'][0:10].replace('-', '')
-            base_name = date + '_LEVEL2_' + scene['platform'] + 'I' + scene['orbitDirection'][0] + '_SIG'
+            base_name = date + '_LEVEL2_' + scene['platform'] + 'I' + scene['orbitDirection'][0].upper() + '_SIG'
             e_coord = str('%g'%(round(scene['centroidLon'] * 10, 0))).zfill(4)
             n_coord = str('%g'%(round(scene['centroidLat'] * 10, 0))).zfill(4)
             base_name = base_name + '_N' + n_coord + '_E' + e_coord
