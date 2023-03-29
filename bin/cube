@@ -11,7 +11,6 @@ from glob import glob
 def cube(prm_file):
     """Cube processed S1 data into existing data cube as specified in PRM_FILE"""
 
-    prm_file = '/home/eouser/projects/force-sar/test/prm_file.prm'
     prm = utils.read_prm(prm_file)
 
     acquisitions=os.listdir(prm['DIR_LEVEL1'])
