@@ -134,7 +134,7 @@ def get_scenes_creodias(aoi = None, satellite = None, start_date = None, end_dat
         query += "&relativeOrbitNumber=" + relative_orbit
 
     if orbit_direction is not None:
-        query += "&orbitDirection=" + orbit_direction.upper()
+        query += "&orbitDirection=" + orbit_direction.lower()
 
     if sensor_mode is not None:
         query += "&sensorMode=" + sensor_mode
