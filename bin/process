@@ -34,6 +34,10 @@ def process(prm_file):
     force_grid = gpd.read_file(prm['FORCE_GRID'])
     force_grid = force_grid[force_grid['Tile_ID'].isin(tiles)]
 
+    direction = prm['DIRECTION']
+    if direction == 'NULL': 
+        direction = None
+
     if prm['DATA_SOURCE'] == 'ASF':
 
         files_level0 = os.listdir(prm['DIR_LEVEL0'])
@@ -88,6 +92,7 @@ def process(prm_file):
                 end_date = prm['DATE_RANGE'].split(' ')[1],
                 product_type = 'GRD', 
                 relative_orbit = orbit,
+                orbit_direction = direction,
                 sensor_mode = 'IW',
                 repo = prm['DATA_SOURCE'])
 
@@ -106,6 +111,7 @@ def process(prm_file):
                 start_date = prm['DATE_RANGE'].split(' ')[0],
                 end_date = prm['DATE_RANGE'].split(' ')[1],
                 product_type = 'GRD',
+                orbit_direction = direction,
                 sensor_mode = 'IW',
                 repo = prm['DATA_SOURCE'])
 
