@@ -170,10 +170,12 @@ def get_scenes_creodias(aoi = None, satellite = None, start_date = None, end_dat
 
     # parse gmlgeometry into wkt format
     df['geometry'] = df['geometry'].str.replace('<gml:MultiPolygon srsName="EPSG:4326"><gml:polygonMember><gml:Polygon><gml:outerBoundaryIs><gml:LinearRing><gml:coordinates>','POLYGON((')
+    df['geometry'] = df['geometry'].str.replace('<gml:Polygon srsName="EPSG:4326"><gml:outerBoundaryIs><gml:LinearRing><gml:coordinates>','POLYGON((')
     df['geometry'] = df['geometry'].str.replace(',',';')
     df['geometry'] = df['geometry'].str.replace(' ',', ')
     df['geometry'] = df['geometry'].str.replace(';',' ')
     df['geometry'] = df['geometry'].str.replace('</gml:coordinates></gml:LinearRing></gml:outerBoundaryIs></gml:Polygon></gml:polygonMember></gml:MultiPolygon>','))')
+    df['geometry'] = df['geometry'].str.replace('</gml:coordinates></gml:LinearRing></gml:outerBoundaryIs></gml:Polygon>','))')
 
     # create and return geodataframe
     df['geometry'] = gpd.GeoSeries.from_wkt(df['geometry'])
