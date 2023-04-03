@@ -110,7 +110,7 @@ def query(prm_file, out_path):
                 repo = prm['DATA_SOURCE'])
 
 
-    scenes.to_file(out_path + 'scenes.geojson', driver='GeoJSON')
+    scenes.to_file(out_path + '/scenes.geojson', driver='GeoJSON')
 
 
 if __name__ == '__main__':
