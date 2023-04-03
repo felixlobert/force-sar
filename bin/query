@@ -35,6 +35,9 @@ def query(prm_file, out_path):
     force_grid = gpd.read_file(prm['FORCE_GRID'])
     force_grid = force_grid[force_grid['Tile_ID'].isin(tiles)]
 
+    direction = prm['DIRECTION']
+    if direction == 'NULL': 
+        direction = None
 
     # if asf api is chosen
     if prm['DATA_SOURCE'] == 'ASF':
@@ -50,6 +53,7 @@ def query(prm_file, out_path):
                 aoi = force_grid,
                 start_date = prm['DATE_RANGE'].split(' ')[0],
                 end_date = prm['DATE_RANGE'].split(' ')[1],
+                orbit_direction = direction,
                 relative_orbit = orbit)
 
                 return scenes
@@ -64,7 +68,8 @@ def query(prm_file, out_path):
             scenes = utils.get_scenes_asf(
                 aoi = force_grid,
                 start_date = prm['DATE_RANGE'].split(' ')[0],
-                end_date = prm['DATE_RANGE'].split(' ')[1])
+                end_date = prm['DATE_RANGE'].split(' ')[1],
+                orbit_direction = direction)
             
     else:        
         # start parallel search for each orbit if orbit(s) set in prm file
@@ -81,6 +86,7 @@ def query(prm_file, out_path):
                 end_date = prm['DATE_RANGE'].split(' ')[1],
                 product_type = 'GRD', 
                 relative_orbit = orbit,
+                orbit_direction = direction,
                 sensor_mode = 'IW',
                 repo = prm['DATA_SOURCE'])
 
@@ -99,11 +105,12 @@ def query(prm_file, out_path):
                 start_date = prm['DATE_RANGE'].split(' ')[0],
                 end_date = prm['DATE_RANGE'].split(' ')[1],
                 product_type = 'GRD',
+                orbit_direction = direction,
                 sensor_mode = 'IW',
                 repo = prm['DATA_SOURCE'])
 
 
-    scenes.to_file(out_path + 'scenes.geojson', driver='GeoJSON')
+    scenes.to_file(out_path + '/scenes.geojson', driver='GeoJSON')
 
 
 if __name__ == '__main__':

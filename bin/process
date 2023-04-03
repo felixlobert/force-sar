@@ -47,7 +47,7 @@ def process(prm_file):
             subset = force_grid.to_crs(epsg=4326).unary_union.intersection(polygon).envelope.wkt
 
             # create file name including centroid coords of scene
-            base_name = date + '_LEVEL2_' + platform + 'I' + direction[0] + '_SIG'
+            base_name = date + '_LEVEL2_' + platform + 'I' + direction[0] + '_GAM'
             base_name = base_name + '_N' + n_coord + '_E' + e_coord
             fname = prm['DIR_LEVEL1'] + '/'  + base_name + '.tif'
 
@@ -116,11 +116,11 @@ def process(prm_file):
 
             # create file name including centroid coords of scene
             date = scene['date'][0:10].replace('-', '')
-            base_name = date + '_LEVEL2_' + scene['platform'] + 'I' + scene['orbitDirection'][0] + '_SIG'
+            base_name = date + '_LEVEL2_' + scene['platform'] + 'I' + scene['orbitDirection'][0].upper() + '_GAM'
             e_coord = str('%g'%(round(scene['centroidLon'] * 10, 0))).zfill(4)
             n_coord = str('%g'%(round(scene['centroidLat'] * 10, 0))).zfill(4)
             base_name = base_name + '_N' + n_coord + '_E' + e_coord
-            fname = prm['DIR_ARCHIVE'] + '/'  + base_name + '.tif'
+            fname = prm['DIR_LEVEL1'] + '/'  + base_name + '.tif'
 
             if os.path.exists(fname):
                 continue

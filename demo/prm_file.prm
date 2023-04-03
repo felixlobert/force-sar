@@ -55,25 +55,20 @@ RESOLUTION = 10
 
 # SENSOR ALLOW-LIST
 # ------------------------------------------------------------------------
-# Sensors to be used in the analysis. Multi-sensor analyses are restricted
-# to the overlapping bands. Following sensors are available: 
-# S1AIA (2-band VV-VH Sentinel-1A IW ascending), S1BIA (2-band VV-VH Senti-
-# nel-1B IW ascending), S1AID (2-band VV-VH Sentinel-1A IW descending), S1BID
-# (2-band VV-VH Sentinel-1B IW descending)
-# The resulting outputs are named according to their band designation, i.e. 
-# VVVHP (VV/VH polarized)
-# Type: Character list. Valid values: {S1AIA,S1BIA,S1AID,S1BID}
-SENSORS = S1AIA S1BIA S1AID S1BID
+# Orbit direction to be used in the analysis. If NULL is set, both directions
+# are considered.
+# Type: Character. Valid values: {ASCENDING,DESCENDING,NULL}
+DIRECTION = ASCENDING
 # Orbits allow-list (NULL if all)
 # Type: Integer list. Valid values: [1,365]
-ORBITS = 44
+ORBITS = NULL
 
 # PROCESSING TIMEFRAME
 # ------------------------------------------------------------------------
 # Time extent for the analysis. All data between these dates will be used in
 # the analysis.
 # Type: Date list. Format: YYYY-MM-DD
-DATE_RANGE = 2020-01-01 2020-01-30
+DATE_RANGE = 2020-01-01 2020-01-10
 # DOY range for filtering the time extent. Day-of-Years that are outside of
 # the given interval will be ignored. Example: DATE_RANGE = 2010-01-01 
 # 2019-12-31, DOY_RANGE = 91 273 will use all April-Sepember observations from
