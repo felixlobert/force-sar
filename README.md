@@ -1,38 +1,40 @@
 # force-sar
 
 ## Intro
-This project aims to create a Sentinel-1 SAR data processing module that can be used to integrate SAR data into the [Framework for Operational Radiometric Correction for Environmental monitoring (FORCE)](https://force-eo.readthedocs.io/en/latest/) and is still in the conception phase.
 
-Right now, force-sar is capable of processing $\gamma^0$ backscatter coefficient from Ground Rage Detected (GRD) Sentinel-1 data. It is possible to either directly use data from a mounted satellite data repository or download the data to your machine.
+force-sar is a module that enables the integration of Sentinel-1 Synthetic Aperture Radar (SAR) data into the [Framework for Operational Radiometric Correction for Environmental monitoring (FORCE)](https://force-eo.readthedocs.io/en/latest/) by David Frantz. force-sar provides the capability to create SAR data cubes with consistent radiometric and geometric properties, covering large regions and time periods. This enables users to perform multi-sensor and multi-temporal analyses. 
+
+With force-sar, Sentinel-1 Ground Range Detected (GRD) acquisitions are preprocessed to analysis-ready backscatter coefficient data, including calibration, speckle filtering, and terrain correction. The analysis-ready SAR data are then seamlessly ingested into your existing FORCE data cube allowing for convenient scalability of operations and applying the whole [FORCE Higher Level](https://force-eo.readthedocs.io/en/latest/components/higher-level/index.html) functionality. With force-sar, you have the flexibility to use GRD data from a mounted satellite data repository or download the data directly to your machine. 
+
+Please note that force-sar is currently in development, and further enhancements are ongoing. Contributions from the community are welcomed to help shape and improve the functionality of force-sar in the future.
 
 ## Main components
 
 force-sar consists of four main components:
 
 1. query
-    - A number of search criteria are defined to search for Sentinel-1 data matching your need of data in space and time. Data can either be downloaded from the [Alaskan Satellite Facility (ASF)](https://asf.alaska.edu/data-sets/sar-data-sets/sentinel-1/) or - in case you are working on [CODE-DE](https://code-de.org/de/), [EO-Lab](https://eo-lab.org/de/) or Creodias - directly be used from the mounted satellite data repository.
-    The query module produces a geojson file, showing you the footprints and additional metadata of the scenes you queried.
+    - The query module allows you to search for Sentinel-1 data that matches your criteria in terms of space and time. You can specify search criteria and retrieve metadata, including footprints, of the scenes that match your query. The data can be downloaded from the Alaskan Satellite Facility (ASF) or, if you are working on [CODE-DE](https://code-de.org/de/), [EO-Lab](https://eo-lab.org/de/) or Creodias, directly used from the mounted satellite data repository. You can also specify additional processing parameters, such as orbit direction, to narrow down your search.
 2. download
-    - In case you don't have access to a mounted satellite data repository, this module downloads the queried S1 scenes from ASF using your user credentials. The downloaded products will be stored in a Level 0 unprocessed product archive.
+    - In case you don't have access to a mounted satellite data repository, the download module allows you to automatically download the queried Sentinel-1 scenes from the [Alaska Satellite Facility - Distributed Active Archive Center](https://asf.alaska.edu/data-sets/sar-data-sets/sentinel-1/) using your user credentials. The downloaded products will be stored in a Level 0 (unprocessed products) archive.
 3. process
-    - Now [esa SNAP](https://hub.docker.com/r/mundialis/esa-snap) takes over the processing of the downloaded or mounted S1 data with a pre-built but easily customizable S1-GRD to $\gamma^0$ workflow (`graphs/grd_to_gamma0.xml`). Within the processing workflow, the S1 data is already subsetted to match the extent of your defined data cube extent to save disk space when working with small study areas. Processed data will be stored in a Level 1 processed but not yet tiled archive.
+    - The processing module uses an [esa SNAP](https://step.esa.int/main/download/snap-download/) [docker image](https://hub.docker.com/r/mundialis/esa-snap) to process the downloaded or mounted Sentinel-1 data with a pre-built, but easily customizable, S1-GRD to $\gamma^0$ workflow (`graphs/grd_to_gamma0.xml`). Within the processing workflow, the S1 data is already subsetted to match the extent of your defined data cube, saving disk space when working with small study areas. Processed data will be stored in a Level 1 (processed but not yet tiled) archive. You can specify additional processing parameters, such as calibration options and speckle filtering.
 4. cube
-    - In this last module, the power of gdal vrts and the FORCE built-in force-cube functionality are used to seamlessly integrate the processed S1 data into your datacube.
+    - In the cube module, the processed S1 data is seamlessly integrated into your FORCE datacube using the power of [gdal vrts](https://gdal.org/drivers/raster/vrt.html) and the FORCE built-in [force-cube](https://force-eo.readthedocs.io/en/latest/components/auxilliary/cube.html) functionality.
 
-## Usage
+## Setup
 
-force-sar comes as completely dockerized stand-alone command line interface. The latest image can be pulled from dockerhub and tested with
+force-sar comes as completely dockerized stand-alone command line interface. The latest image can be pulled from dockerhub and tested with:
 ```bash
 docker pull felixlobert/force-sar
 docker run felixlobert/force-sar
 ```
-all force-sar functions will subsequently be run inside a container.
+Keep in mind that all force-sar functions are performed within the Docker container. As a result, you need to properly mount the directories that contain the data you want to use with force-sar when executing the `docker run` command. To streamline the process and make it more user-friendly, you may want to add a customized alias, similar to the example provided, to your `~/.bashrc` file for seamless and convenient usage of force-sar.
 
-It might be handy to add this or a similar alias to your ~/.bashrc for a more convenient usage of force-sar.
 ```bash
-alias dforce-sar=' \
+alias force-sar=' \
   docker run \
   -u "$(id -u):$(id -g)" \
+  -v $HOME:$HOME \
   -v /var/run/docker.sock:/var/run/docker.sock \
   -v /etc/group:/etc/group:ro \
   --group-add $(stat -c '%g' /var/run/docker.sock) \
@@ -40,11 +42,15 @@ alias dforce-sar=' \
   --rm \
   felixlobert/force-sar'
 ```
-Note that it is important to mount your docker.sock to the container since force-sar itself needs to start a docker container with davidfrantz/force during the cubing module.
+Note force-sar itself makes use of Docker in form of starting a FORCE container for certain operations (e.g., cube). Therefore, your Docker socket (docker.sock) needs to be mounted to the container to make this interaction with the Docker daemon possible. This ensures that force-sar has the necessary permissions and access to Docker functionalities for the specific modules.
 
-The usage of the force-sar functions is quite similar to using FORCE. You prepare a parameter file that is then simply provided to one of the functions. An example parameter file can be found under `demo/prm_file.prm`. To see a short description and which arguments and options are needed by a function, simply add `--help` to the command, e.g.:
+## Usage
+
+Using the force-sar functions is similar to using FORCE. To get started, prepare a parameter file and provide it to one of the functions. You can find an example parameter file at `demo/prm_file.prm`. To learn more about the required arguments and options for a function, you can add `--help` to the command. For example:
 ```bash
-dforce-sar query --help
+force-sar query --help
 ```
+
 ## Acknowledgements
-Like many other projects, this one benefits greatly from the features and the data cube concept of the Framework for Operational Radiometric Correction for Environmental monitoring (FORCE) by David Frantz.
+
+force-sar greatly benefits from the features and the data cube concept of the [Framework for Operational Radiometric Correction for Environmental monitoring (FORCE)](https://force-eo.readthedocs.io/en/latest/) by David Frantz, and acknowledges its contribution to the project.
