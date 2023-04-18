@@ -1,30 +1,61 @@
 #!/usr/bin/python3
 
-from src import utils
-import geopandas as gpd
-import asf_search as asf
-import click
+from pathlib import Path   # For working with file paths
+import geopandas as gpd    # For reading GeoJSON files
+import asf_search as asf   # For searching and downloading ASF data
+import click               # For building command-line interfaces
+from src.utils import read_prm     # Custom utility function for reading PRM files
+
+
+DEFAULT_CREDENTIALS_FILE = Path.home() / '.asf_credentials'
+
 
 @click.command()
 @click.argument('prm_file', type=click.Path(exists=True))
 @click.argument('query_file', type=click.Path(exists=True))
-@click.option("--username", prompt=True, hide_input=False, confirmation_prompt=False)
-@click.option("--password", prompt=True, hide_input=True, confirmation_prompt=False)
-
-def download(prm_file, query_file, username, password):
-    """Download satellite data from ASF defined in a QUERY_FILE to a defined OUT_PATH"""
+@click.option("--username", "-u", default="", help="ASF Portal username")
+@click.option("--password", "-p", default="", help="ASF Portal password")
+@click.option("--use-credentials-file", is_flag=True, help="Use credentials file (located at ~/.asf_credentials)")
+@click.option("--credentials-file", default=DEFAULT_CREDENTIALS_FILE, help="Location of credentials file")
+def download_satellite_data(prm_file, query_file, username, password, use_credentials_file, credentials_file):
+    """Download satellite data from ASF defined in a QUERY_FILE."""
     
-    prm = utils.read_prm(prm_file)
+    # Load credentials from credentials file, if specified.
+    if use_credentials_file:
+        username, password = load_credentials_from_file(credentials_file)
 
+    # Read PRM file.
+    prm = read_prm(prm_file)
+
+    # Read GeoJSON query file.
     query_file = gpd.read_file(query_file)
 
-    session = asf.ASFSession().auth_with_creds(username, password)
+    # Download URLs using asf_search library, with authentication provided by ASFSession.
+    with asf.ASFSession() as session:
+        session.auth_with_creds(username, password)
+        asf.download_urls(
+            urls=query_file.productIdentifier,
+            path=prm['DIR_LEVEL0'],
+            processes=4,
+            session=session
+        )
 
-    asf.download_urls(urls=query_file.productIdentifier,
-                      path=prm['DIR_LEVEL0'],
-                      processes=4,
-                      session=session)
+
+def load_credentials_from_file(credentials_file):
+    """Load username and password from credentials file."""
+    
+    try:
+        with credentials_file.open('r') as f:
+            lines = f.readlines()
+            username = lines[0].strip()
+            password = lines[1].strip()
+            
+            return username, password
+    
+    except:
+        print(f"Error: Could not read credentials from file '{credentials_file}'")
+        exit()
 
 
 if __name__ == '__main__':
-    download()
+    download_satellite_data()
