@@ -71,6 +71,39 @@ def read_til(til_file):
     return tiles
 
 
+def define_tiles(prm):
+    """Find common tiles from defined ranges and optional tile file.
+
+    Parameters
+    ----------
+    prm : dictionary
+        Containing key value pairs for all variables included in the parameter file.
+    
+    Returns
+    -------
+    list
+        Containing tiles that are defined both from the tile range and the optional tile file.
+
+    """
+
+    # find common tiles from defined range and optional tile file
+    x_range = [int(i) for i in prm['X_TILE_RANGE'].split(' ')]
+    x_range = list(range(x_range[0], x_range[1] + 1))
+    x_range = [str(i).zfill(4) for i in x_range]
+
+    y_range = [int(i) for i in prm['Y_TILE_RANGE'].split(' ')]
+    y_range = list(range(y_range[0], y_range[1] + 1))
+    y_range = [str(i).zfill(4) for i in y_range]
+
+    tiles = ['X' + x_tile + '_Y' + y_tile for x_tile in x_range for y_tile in y_range]
+
+    if prm['FILE_TILE'] != 'NULL':
+        tiles_file = read_til(prm['FILE_TILE'])
+        tiles = set(tiles).intersection(tiles_file)
+
+    return tiles
+
+
 def get_scenes_creodias(aoi = None, satellite = None, start_date = None, end_date = None, product_type = None, sensor_mode = None, relative_orbit = None, orbit_direction = None, repo = 'CODEDE'):
     """Query metadata for available satellite imagery in the repositories of CODE-DE and Creodias.
 
@@ -256,7 +289,7 @@ def get_scenes_asf(aoi = None, start_date = None, end_date = None, relative_orbi
     return gdf
 
 
-def get_metadata(filepath):
+def get_metadata_from_s1_file(filepath):
     """Get metadata for a zipped S1 scene.
 
     Parameters
