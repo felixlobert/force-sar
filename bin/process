@@ -13,70 +13,65 @@ import click
 def process(prm_file):
     """Process satellite data either downloaded from ASF or from DIAS as specified in PRM_FILE"""
 
+    # read parameters from prm file
     prm = utils.read_prm(prm_file)
-
-    # find common tiles from defined range and oprional tile file
-    x_range = [int(i) for i in prm['X_TILE_RANGE'].split(' ')]
-    x_range = list(range(x_range[0], x_range[1] + 1))
-    x_range = [str(i).zfill(4) for i in x_range]
-
-    y_range = [int(i) for i in prm['Y_TILE_RANGE'].split(' ')]
-    y_range = list(range(y_range[0], y_range[1] + 1))
-    y_range = [str(i).zfill(4) for i in y_range]
-
-    tiles = ['X' + x_tile + '_Y' + y_tile for x_tile in x_range for y_tile in y_range]
-
-    if prm['FILE_TILE'] != 'NULL':
-        tiles_file = utils.read_til(prm['FILE_TILE'])
-        tiles = set(tiles).intersection(tiles_file)
+    
+    # define tile from tile range and optional tile file in prm file
+    tiles = utils.define_tiles(prm)
 
     # read and filter force grid for tile list
     force_grid = gpd.read_file(prm['FORCE_GRID'])
     force_grid = force_grid[force_grid['Tile_ID'].isin(tiles)]
 
-    direction = prm['DIRECTION']
-    if direction == 'NULL': 
-        direction = None
+    # define direction from prm file
+    direction = prm['DIRECTION'] if prm['DIRECTION'] != 'NULL' else None
 
     if prm['DATA_SOURCE'] == 'ASF':
 
-        files_level0 = os.listdir(prm['DIR_LEVEL0'])
-        files_level0 = [prm['DIR_LEVEL0'] + i for i in files_level0]
+        dir_level0 = prm['DIR_LEVEL0']
+        files_level0 = [os.path.join(dir_level0, file) for file in os.listdir(dir_level0)]
 
         for file in files_level0:
             
-            date, platform, direction, e_coord, n_coord, polygon = utils.get_metadata(file)
+            date, platform, scene_direction, e_coord, n_coord, polygon = utils.get_metadata_from_s1_file(file)
 
             # define wkt subset as bbox of intersection between scene and tiles as processing extent 
             subset = force_grid.to_crs(epsg=4326).unary_union.intersection(polygon).envelope.wkt
 
             # create file name including centroid coords of scene
-            base_name = date + '_LEVEL2_' + platform + 'I' + direction[0] + '_GAM'
-            base_name = base_name + '_N' + n_coord + '_E' + e_coord
-            fname = prm['DIR_LEVEL1'] + '/'  + base_name + '.tif'
+            base_name = f"{date}_LEVEL2_{platform}I{scene_direction[0]}_GAM_N{n_coord}_E{e_coord}.tif"
+            fname = os.path.join(prm['DIR_LEVEL1'], base_name)
 
             if os.path.exists(fname):
                 continue
 
             # create snap gpt command and execute
-            cmd = '/usr/local/snap/bin/gpt /home/force-sar/graphs/grd_to_gamma0.xml'
-            cmd += ' -Pinput=' + file
-            cmd += ' -Poutput=' + fname 
-            cmd += ' -Pspeckle_filter=\'' + prm['SPECKLE_FILTER'].title() +'\'' 
-            cmd += ' -Pfilter_size=' + prm['FILTER_SIZE'] 
-            cmd += ' -Presolution=' + prm['RESOLUTION'] 
-            cmd += ' -Paoi=\'' + subset + '\''
+            cmd = [
+                '/usr/local/snap/bin/gpt', 
+                '/home/force-sar/graphs/grd_to_gamma0.xml', 
+                f'-Pinput={file}', 
+                f'-Poutput={fname}',
+                f'-Pspeckle_filter=\'{prm["SPECKLE_FILTER"].title()}\'',
+                f'-Pfilter_size={prm["FILTER_SIZE"]}', 
+                f'-Presolution={prm["RESOLUTION"]}',
+                f'-Paoi=\'{subset}\'', 
+                f'-q {prm["NTHREAD"]}',
+                '-J-Xms2G', 
+                f'-J-Xmx{prm["MAX_MEMORY"]}G', 
+                f'-c {int(float(prm["MAX_MEMORY"])*0.7)}G',
+                '-Dsnap.dataio.bigtiff.compression.type=LZW', 
+                '-Dsnap.dataio.bigtiff.tiling.width=512', 
+                '-Dsnap.dataio.bigtiff.tiling.height=512'
+            ]
 
-            # define processing parameters
-            cmd += ' -q ' + prm['NTHREAD']
-            cmd += ' -J-Xms2G -J-Xmx' + prm['MAX_MEMORY'] + 'G -c ' + str('%i'%(float(prm['MAX_MEMORY'])*0.7)) +'G'
-            cmd += ' -Dsnap.dataio.bigtiff.compression.type=LZW'
-            cmd += ' -Dsnap.dataio.bigtiff.tiling.width=512'
-            cmd += ' -Dsnap.dataio.bigtiff.tiling.height=512'
+            # join list to form command string
+            cmd = ' '.join(cmd)
 
             os.system(cmd)
 
     else:
+        
+        start, end = prm['DATE_RANGE'].split(' ')
 
         # start parallel search for each orbit if orbit(s) set in prm file
         if prm['ORBITS'] != 'NULL':
@@ -85,17 +80,15 @@ def process(prm_file):
                 
             def get_scenes_per_orbit(orbit):
 
-                scenes = utils.get_scenes_creodias(
-                aoi = force_grid,
-                satellite = 'Sentinel1',
-                start_date = prm['DATE_RANGE'].split(' ')[0],
-                end_date = prm['DATE_RANGE'].split(' ')[1],
-                product_type = 'GRD', 
-                relative_orbit = orbit,
-                orbit_direction = direction,
-                sensor_mode = 'IW',
-                repo = prm['DATA_SOURCE'])
-
+                scenes = utils.get_scenes_creodias(aoi=force_grid,
+                                       satellite='Sentinel1',
+                                       start_date=start,
+                                       end_date=end,
+                                       product_type='GRD',
+                                       relative_orbit=orbit,
+                                       orbit_direction=direction,
+                                       sensor_mode='IW',
+                                       repo=prm['DATA_SOURCE'])
                 return scenes
 
             # create the process pool and search for scenes in parallel
@@ -108,8 +101,8 @@ def process(prm_file):
             scenes = utils.get_scenes_creodias(
                 aoi = force_grid,
                 satellite = 'Sentinel1',
-                start_date = prm['DATE_RANGE'].split(' ')[0],
-                end_date = prm['DATE_RANGE'].split(' ')[1],
+                start_date = start,
+                end_date = end,
                 product_type = 'GRD',
                 orbit_direction = direction,
                 sensor_mode = 'IW',
@@ -122,30 +115,37 @@ def process(prm_file):
 
             # create file name including centroid coords of scene
             date = scene['date'][0:10].replace('-', '')
-            base_name = date + '_LEVEL2_' + scene['platform'] + 'I' + scene['orbitDirection'][0].upper() + '_GAM'
+            scene_direction = scene['orbitDirection'][0].upper()
             e_coord = str('%g'%(round(scene['centroidLon'] * 10, 0))).zfill(4)
             n_coord = str('%g'%(round(scene['centroidLat'] * 10, 0))).zfill(4)
-            base_name = base_name + '_N' + n_coord + '_E' + e_coord
-            fname = prm['DIR_LEVEL1'] + '/'  + base_name + '.tif'
+            
+            # create file name including centroid coords of scene
+            base_name = f"{date}_LEVEL2_{scene['platform']}I{scene_direction}_GAM_N{n_coord}_E{e_coord}.tif"
+            fname = os.path.join(prm['DIR_LEVEL1'], base_name)
 
             if os.path.exists(fname):
                 continue
 
             # create snap gpt command and execute
-            cmd = '/usr/local/snap/bin/gpt /home/force-sar/graphs/grd_to_gamma0.xml'
-            cmd += ' -Pinput=' + scene['productIdentifier'] + '/manifest.safe'
-            cmd += ' -Poutput=' + fname 
-            cmd += ' -Pspeckle_filter=\'' + prm['SPECKLE_FILTER'].title() +'\'' 
-            cmd += ' -Pfilter_size=' + prm['FILTER_SIZE'] 
-            cmd += ' -Presolution=' + prm['RESOLUTION'] 
-            cmd += ' -Paoi=\'' + subset + '\''
+            cmd = [
+                '/usr/local/snap/bin/gpt',
+                '/home/force-sar/graphs/grd_to_gamma0.xml',
+                f'-Pinput={scene["productIdentifier"]}/manifest.safe',
+                f'-Poutput={fname}',
+                f'-Pspeckle_filter=\'{prm["SPECKLE_FILTER"].title()}\'',
+                f'-Pfilter_size={prm["FILTER_SIZE"]}',
+                f'-Presolution={prm["RESOLUTION"]}',
+                f'-Paoi=\'{subset}\'',
+                '-q', prm["NTHREAD"],
+                '-J-Xms2G', f'-J-Xmx{prm["MAX_MEMORY"]}G',
+                f'-c {int(float(prm["MAX_MEMORY"]) * 0.7)}G',
+                '-Dsnap.dataio.bigtiff.compression.type=LZW',
+                '-Dsnap.dataio.bigtiff.tiling.width=512',
+                '-Dsnap.dataio.bigtiff.tiling.height=512'
+            ]
 
-            # define processing parameters
-            cmd += ' -q ' + prm['NTHREAD']
-            cmd += ' -J-Xms2G -J-Xmx' + prm['MAX_MEMORY'] + 'G -c ' + str('%i'%(float(prm['MAX_MEMORY'])*0.7)) +'G'
-            cmd += ' -Dsnap.dataio.bigtiff.compression.type=LZW'
-            cmd += ' -Dsnap.dataio.bigtiff.tiling.width=512'
-            cmd += ' -Dsnap.dataio.bigtiff.tiling.height=512'
+            # join list to form command string
+            cmd = ' '.join(cmd)
 
             os.system(cmd)
 
