@@ -25,7 +25,7 @@ def cube(prm_file):
     else:
         docker_cmd += ' -v ' + os.getcwd() + '/' + prm['DIR_LEVEL1'] + ':' + os.getcwd() + '/' + prm['DIR_LEVEL1']
         docker_cmd += ' -v ' + os.getcwd() + '/' + prm['DIR_LEVEL2'] + ':' + os.getcwd() + '/' + prm['DIR_LEVEL2']
-    docker_cmd += ' -w ' + os.getcwd() + '/'
+    docker_cmd += ' -w $PWD' 
     docker_cmd += ' davidfrantz/force /bin/bash'
     os.system(docker_cmd)
 
