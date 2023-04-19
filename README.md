@@ -51,6 +51,24 @@ Using the force-sar functions is similar to using FORCE. To get started, prepare
 force-sar query --help
 ```
 
+### ASF credentials
+
+When using ASF as data source, you have to provide your own credentials. They can be stored in a file named `~/.asf_credentials` in your home directory that should contain the ASF Portal username and password in separate lines. The file name is ".asf_credentials" (with a dot in front), which makes it a hidden file.
+
+The file should have the following format:
+```
+username
+password
+```
+For example, if the username is "johndoe" and the password is "mypassword", the contents of the file would be:
+```
+johndoe
+mypassword
+```
+Please note that this file contains sensitive information, so it should be kept confidential and protected from unauthorized access.
+
+It is also possible to enter your credentials directly within the command when running `force-sar download`. More information on thus can be taken from `force-sar download --help`.
+
 ## Acknowledgements
 
 force-sar greatly benefits from the features and the data cube concept of the [Framework for Operational Radiometric Correction for Environmental monitoring (FORCE)](https://force-eo.readthedocs.io/en/latest/) by David Frantz, and acknowledges its contribution to the project.
