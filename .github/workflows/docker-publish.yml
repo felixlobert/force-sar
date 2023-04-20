@@ -39,6 +39,7 @@ jobs:
           echo GITHUB_REF_NAME=$GITHUB_REF_NAME
           [ "$GITHUB_REF_NAME" == "main" ] && IMG_TAG=latest
           [ "$GITHUB_REF_NAME" == "dev" ] && IMG_TAG=dev
+          [ "$GITHUB_REF_NAME" == "test" ] && IMG_TAG=test
           echo IMG_TAG=$IMG_TAG
           echo "IMG_TAG=$IMG_TAG" >> $GITHUB_OUTPUT 
       -
