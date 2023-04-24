@@ -1,11 +1,14 @@
 #!/usr/bin/python3
 
 import os
-from src import utils
+from multiprocessing.pool import ThreadPool as Pool
+
+import click
 import geopandas as gpd
 import pandas as pd
-from multiprocessing.pool import ThreadPool as Pool
-import click
+
+from src import utils
+
 
 @click.command()
 @click.argument('prm_file', type=click.Path(exists=True))

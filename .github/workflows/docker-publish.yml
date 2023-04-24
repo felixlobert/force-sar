@@ -5,6 +5,28 @@ on:
     branches: [main, dev]
 
 jobs:
+  format:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Format code with black
+        run: |
+          pip install black
+          black bin/* --force-exclude bin/force-sar -t py36
+          black . -t py36
+      - name: Sort imports with isort
+        run: |
+          pip install isort
+          isort . --py 36
+      - name: Remove unused imports with autoflake
+        run: |
+          pip install autoflake
+          autoflake --in-place --remove-all-unused-imports --remove-unused-variables --recursive .
+      - name: Commit changes
+        uses: EndBug/add-and-commit@v9
+        with:
+          default_author: github_actions
+          message: "Clean code with black, isort, and autoflake"
   docker:
     runs-on: ubuntu-latest
     steps:
@@ -15,6 +37,7 @@ jobs:
           echo GITHUB_REF_NAME=$GITHUB_REF_NAME
           [ "$GITHUB_REF_NAME" == "main" ] && IMG_TAG=latest
           [ "$GITHUB_REF_NAME" == "dev" ] && IMG_TAG=dev
+          [ "$GITHUB_REF_NAME" == "test" ] && IMG_TAG=test
           echo IMG_TAG=$IMG_TAG
           echo "IMG_TAG=$IMG_TAG" >> $GITHUB_OUTPUT 
       -
