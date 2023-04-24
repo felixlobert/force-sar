@@ -2,7 +2,7 @@ name: docker build and publish
 
 on:
   push:
-    branches: [main, dev, test]
+    branches: [main, dev]
 
 jobs:
   format:
@@ -12,11 +12,12 @@ jobs:
       - name: Format code with black
         run: |
           pip install black
-          black .
+          black bin/* --force-exclude bin/force-sar -t py36
+          black . -t py36
       - name: Sort imports with isort
         run: |
           pip install isort
-          isort .
+          isort . --py 36
       - name: Remove unused imports with autoflake
         run: |
           pip install autoflake
