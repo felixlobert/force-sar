@@ -28,6 +28,7 @@ jobs:
           default_author: github_actions
           message: "Clean code with black, isort, and autoflake"
   docker:
+    needs: format
     runs-on: ubuntu-latest
     steps:
       -
