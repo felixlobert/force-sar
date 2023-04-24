@@ -11,6 +11,18 @@ from src.utils import read_prm  # Custom utility function for reading PRM files
 DEFAULT_CREDENTIALS_FILE = Path.home() / '.asf_credentials'
 
 
+
+
+
+
+
+
+
+
+
+
+
+
 @click.command()
 @click.argument('prm_file', type=click.Path(exists=True))
 @click.argument('query_file', type=click.Path(exists=True))

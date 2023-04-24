@@ -22,13 +22,10 @@ jobs:
           pip install autoflake
           autoflake --in-place --remove-all-unused-imports --remove-unused-variables --recursive .
       - name: Commit changes
-        uses: EndBug/add-and-commit@v4
+        uses: EndBug/add-and-commit@v9
         with:
-          author_name: ${{ github.actor }}
-          author_email: ${{ github.actor }}@users.noreply.github.com
-          message: "Format code with black"
-          add: "."
-          branch: ${{ github.ref }}
+          default_author: github_actions
+          message: "Clean code with black, isort, and autoflake"
   docker:
     runs-on: ubuntu-latest
     steps:
