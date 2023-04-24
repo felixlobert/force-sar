@@ -9,56 +9,75 @@ from src import utils
 
 
 @click.command()
-@click.argument('prm_file', type=click.Path(exists=True))
-
+@click.argument("prm_file", type=click.Path(exists=True))
 def cube(prm_file):
     """Cube processed S1 data into existing data cube as specified in PRM_FILE"""
 
     prm = utils.read_prm(prm_file)
 
-    acquisitions=next(os.walk(prm['DIR_LEVEL1']))[2]
-    acquisitions=[i.split('_GAM')[0] for i in acquisitions]
-    acquisitions=sorted([*{*acquisitions}])
+    acquisitions = next(os.walk(prm["DIR_LEVEL1"]))[2]
+    acquisitions = [i.split("_GAM")[0] for i in acquisitions]
+    acquisitions = sorted([*{*acquisitions}])
 
-    docker_cmd = 'docker run'
-    docker_cmd += ' -t -d --name force-container'
-    if prm['DIR_LEVEL1'][0] == '/':
-        docker_cmd += ' -v ' + prm['DIR_LEVEL1'] + ':' + prm['DIR_LEVEL1']
-        docker_cmd += ' -v ' + prm['DIR_LEVEL2'] + ':' + prm['DIR_LEVEL2']
+    docker_cmd = "docker run"
+    docker_cmd += " -t -d --name force-container"
+    if prm["DIR_LEVEL1"][0] == "/":
+        docker_cmd += " -v " + prm["DIR_LEVEL1"] + ":" + prm["DIR_LEVEL1"]
+        docker_cmd += " -v " + prm["DIR_LEVEL2"] + ":" + prm["DIR_LEVEL2"]
     else:
-        docker_cmd += ' -v ' + os.getcwd() + '/' + prm['DIR_LEVEL1'] + ':' + os.getcwd() + '/' + prm['DIR_LEVEL1']
-        docker_cmd += ' -v ' + os.getcwd() + '/' + prm['DIR_LEVEL2'] + ':' + os.getcwd() + '/' + prm['DIR_LEVEL2']
-    docker_cmd += ' -w $PWD' 
-    docker_cmd += ' davidfrantz/force /bin/bash'
+        docker_cmd += (
+            " -v "
+            + os.getcwd()
+            + "/"
+            + prm["DIR_LEVEL1"]
+            + ":"
+            + os.getcwd()
+            + "/"
+            + prm["DIR_LEVEL1"]
+        )
+        docker_cmd += (
+            " -v "
+            + os.getcwd()
+            + "/"
+            + prm["DIR_LEVEL2"]
+            + ":"
+            + os.getcwd()
+            + "/"
+            + prm["DIR_LEVEL2"]
+        )
+    docker_cmd += " -w $PWD"
+    docker_cmd += " davidfrantz/force /bin/bash"
     os.system(docker_cmd)
 
-    mosaic_path = os.path.join(prm['DIR_LEVEL1'], 'mosaic')
+    mosaic_path = os.path.join(prm["DIR_LEVEL1"], "mosaic")
 
     if not os.path.exists(mosaic_path):
         os.mkdir(mosaic_path)
 
     for acquisition in acquisitions:
-        
-        mosaic_name = os.path.join(mosaic_path, acquisition + '_GAM.vrt')
+        mosaic_name = os.path.join(mosaic_path, acquisition + "_GAM.vrt")
 
         if os.path.exists(mosaic_name):
             continue
 
-        vrt_cmd = 'docker exec force-container gdalbuildvrt'
-        vrt_cmd += ' -vrtnodata -9999 -srcnodata -9999 '
-        vrt_cmd += mosaic_name + ' '
-        vrt_cmd += ' '.join(glob(os.path.join(prm['DIR_LEVEL1'], acquisition + '*.tif')))
+        vrt_cmd = "docker exec force-container gdalbuildvrt"
+        vrt_cmd += " -vrtnodata -9999 -srcnodata -9999 "
+        vrt_cmd += mosaic_name + " "
+        vrt_cmd += " ".join(
+            glob(os.path.join(prm["DIR_LEVEL1"], acquisition + "*.tif"))
+        )
         os.system(vrt_cmd)
 
-        cube_cmd = 'docker exec force-container force-cube'
-        cube_cmd += ' -o ' + prm['DIR_LEVEL2'] 
-        cube_cmd += ' -n -9999 -t Int16 -r near'
-        cube_cmd += ' -j ' + prm['NTHREAD'] + ' -s ' + prm['RESOLUTION']
-        cube_cmd += ' ' + mosaic_name
+        cube_cmd = "docker exec force-container force-cube"
+        cube_cmd += " -o " + prm["DIR_LEVEL2"]
+        cube_cmd += " -n -9999 -t Int16 -r near"
+        cube_cmd += " -j " + prm["NTHREAD"] + " -s " + prm["RESOLUTION"]
+        cube_cmd += " " + mosaic_name
         os.system(cube_cmd)
 
-    os.system('docker stop force-container')
-    os.system('docker rm force-container')
+    os.system("docker stop force-container")
+    os.system("docker rm force-container")
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     cube()

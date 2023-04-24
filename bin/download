@@ -8,31 +8,29 @@ import geopandas as gpd  # For reading GeoJSON files
 
 from src.utils import read_prm  # Custom utility function for reading PRM files
 
-DEFAULT_CREDENTIALS_FILE = Path.home() / '.asf_credentials'
-
-
-
-
-
-
-
-
-
-
-
-
+DEFAULT_CREDENTIALS_FILE = Path.home() / ".asf_credentials"
 
 
 @click.command()
-@click.argument('prm_file', type=click.Path(exists=True))
-@click.argument('query_file', type=click.Path(exists=True))
+@click.argument("prm_file", type=click.Path(exists=True))
+@click.argument("query_file", type=click.Path(exists=True))
 @click.option("--username", "-u", default="", help="ASF Portal username")
 @click.option("--password", "-p", default="", help="ASF Portal password")
-@click.option("--use-credentials-file", is_flag=True, help="Use credentials file (located at ~/.asf_credentials)")
-@click.option("--credentials-file", default=DEFAULT_CREDENTIALS_FILE, help="Location of credentials file")
-def download_satellite_data(prm_file, query_file, username, password, use_credentials_file, credentials_file):
+@click.option(
+    "--use-credentials-file",
+    is_flag=True,
+    help="Use credentials file (located at ~/.asf_credentials)",
+)
+@click.option(
+    "--credentials-file",
+    default=DEFAULT_CREDENTIALS_FILE,
+    help="Location of credentials file",
+)
+def download_satellite_data(
+    prm_file, query_file, username, password, use_credentials_file, credentials_file
+):
     """Download satellite data from ASF defined in a QUERY_FILE."""
-    
+
     # Load credentials from credentials file, if specified.
     if use_credentials_file:
         username, password = load_credentials_from_file(credentials_file)
@@ -48,27 +46,27 @@ def download_satellite_data(prm_file, query_file, username, password, use_creden
         session.auth_with_creds(username, password)
         asf.download_urls(
             urls=query_file.productIdentifier,
-            path=prm['DIR_LEVEL0'],
+            path=prm["DIR_LEVEL0"],
             processes=4,
-            session=session
+            session=session,
         )
 
 
 def load_credentials_from_file(credentials_file):
     """Load username and password from credentials file."""
-    
+
     try:
-        with credentials_file.open('r') as f:
+        with credentials_file.open("r") as f:
             lines = f.readlines()
             username = lines[0].strip()
             password = lines[1].strip()
-            
+
             return username, password
-    
+
     except:
         print(f"Error: Could not read credentials from file '{credentials_file}'")
         exit()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     download_satellite_data()

@@ -10,85 +10,88 @@ from src import utils
 
 
 @click.command()
-@click.argument('prm_file', type=click.Path(exists=True))
-@click.argument('out_path', type=click.Path(exists=True))
+@click.argument("prm_file", type=click.Path(exists=True))
+@click.argument("out_path", type=click.Path(exists=True))
 def query_scenes(prm_file, out_path):
     """
     Query satellite data matching criteria given in PRM_FILE
     and write the results to a geojson file stored in OUT_PATH.
     """
-    
+
     # read parameters from prm file
     prm = utils.read_prm(prm_file)
-    
+
     # define tile from tile range and optional tile file in prm file
     tiles = utils.define_tiles(prm)
 
     # Read and filter force grid for tile list
-    force_grid = gpd.read_file(prm['FORCE_GRID'])
-    force_grid = force_grid[force_grid['Tile_ID'].isin(tiles)]
+    force_grid = gpd.read_file(prm["FORCE_GRID"])
+    force_grid = force_grid[force_grid["Tile_ID"].isin(tiles)]
 
     # define direction from prm file
-    direction = prm['DIRECTION'] if prm['DIRECTION'] != 'NULL' else None
+    direction = prm["DIRECTION"] if prm["DIRECTION"] != "NULL" else None
 
     # If asf api is chosen
-    if prm['DATA_SOURCE'] == 'ASF':
-
+    if prm["DATA_SOURCE"] == "ASF":
         # Start parallel search for each orbit if orbit(s) set in prm file
-        if prm['ORBITS'] != 'NULL':
-            orbits = prm['ORBITS'].split(' ')
+        if prm["ORBITS"] != "NULL":
+            orbits = prm["ORBITS"].split(" ")
 
             def get_scenes_per_orbit(orbit):
                 return utils.get_scenes_asf(
                     aoi=force_grid,
-                    start_date=prm['DATE_RANGE'].split(' ')[0],
-                    end_date=prm['DATE_RANGE'].split(' ')[1],
+                    start_date=prm["DATE_RANGE"].split(" ")[0],
+                    end_date=prm["DATE_RANGE"].split(" ")[1],
                     orbit_direction=direction,
-                    relative_orbit=orbit)
+                    relative_orbit=orbit,
+                )
 
-            with ThreadPoolExecutor(max_workers=int(prm['NTHREAD'])) as executor:
+            with ThreadPoolExecutor(max_workers=int(prm["NTHREAD"])) as executor:
                 scenes = pd.concat(executor.map(get_scenes_per_orbit, orbits))
 
         else:
             scenes = utils.get_scenes_asf(
                 aoi=force_grid,
-                start_date=prm['DATE_RANGE'].split(' ')[0],
-                end_date=prm['DATE_RANGE'].split(' ')[1],
-                orbit_direction=direction)
+                start_date=prm["DATE_RANGE"].split(" ")[0],
+                end_date=prm["DATE_RANGE"].split(" ")[1],
+                orbit_direction=direction,
+            )
 
     else:
         # Start parallel search for each orbit if orbit(s) set in prm file
-        if prm['ORBITS'] != 'NULL':
-            orbits = prm['ORBITS'].split(' ')
+        if prm["ORBITS"] != "NULL":
+            orbits = prm["ORBITS"].split(" ")
 
             def get_scenes_per_orbit(orbit):
                 return utils.get_scenes_creodias(
                     aoi=force_grid,
-                    satellite='Sentinel1',
-                    start_date=prm['DATE_RANGE'].split(' ')[0],
-                    end_date=prm['DATE_RANGE'].split(' ')[1],
-                    product_type='GRD', 
+                    satellite="Sentinel1",
+                    start_date=prm["DATE_RANGE"].split(" ")[0],
+                    end_date=prm["DATE_RANGE"].split(" ")[1],
+                    product_type="GRD",
                     relative_orbit=orbit,
                     orbit_direction=direction,
-                    sensor_mode='IW',
-                    repo=prm['DATA_SOURCE'])
+                    sensor_mode="IW",
+                    repo=prm["DATA_SOURCE"],
+                )
 
-            with ThreadPoolExecutor(max_workers=int(prm['NTHREAD'])) as executor:
+            with ThreadPoolExecutor(max_workers=int(prm["NTHREAD"])) as executor:
                 scenes = pd.concat(executor.map(get_scenes_per_orbit, orbits))
 
         else:
             scenes = utils.get_scenes_creodias(
                 aoi=force_grid,
-                satellite='Sentinel1',
-                start_date=prm['DATE_RANGE'].split(' ')[0],
-                end_date=prm['DATE_RANGE'].split(' ')[1],
-                product_type='GRD',
+                satellite="Sentinel1",
+                start_date=prm["DATE_RANGE"].split(" ")[0],
+                end_date=prm["DATE_RANGE"].split(" ")[1],
+                product_type="GRD",
                 orbit_direction=direction,
-                sensor_mode='IW',
-                repo=prm['DATA_SOURCE'])
+                sensor_mode="IW",
+                repo=prm["DATA_SOURCE"],
+            )
 
-    scenes.to_file(f'{out_path}/scenes.geojson', driver='GeoJSON')
+    scenes.to_file(f"{out_path}/scenes.geojson", driver="GeoJSON")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     query_scenes()
