@@ -35,14 +35,10 @@ alias force-sar=' \
   docker run \
   -u "$(id -u):$(id -g)" \
   -v $HOME:$HOME \
-  -v /var/run/docker.sock:/var/run/docker.sock \
-  -v /etc/group:/etc/group:ro \
-  --group-add $(stat -c '%g' /var/run/docker.sock) \
   -ti \
   --rm \
   felixlobert/force-sar'
 ```
-Note force-sar itself makes use of Docker in form of starting a FORCE container for certain operations (e.g., cube). Therefore, your Docker socket (docker.sock) needs to be mounted to the container to make this interaction with the Docker daemon possible. This ensures that force-sar has the necessary permissions and access to Docker functionalities for the specific modules.
 
 ## Usage
 
