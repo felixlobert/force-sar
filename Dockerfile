@@ -16,13 +16,13 @@ WORKDIR /home/force-sar
 # install gdal
 RUN apt-get update && \
     apt-get -y install software-properties-common && \
-    add-apt-repository ppa:ubuntugis/ppa && \
+    add-apt-repository ppa:ubuntugis/ubuntugis-unstable && \
     apt-get update && \
     apt-get -y install gdal-bin && \
     apt-get -y install libgdal-dev && \
     export CPLUS_INCLUDE_PATH=/usr/include/gdal && \
     export C_INCLUDE_PATH=/usr/include/gdal && \
-    pip install --no-cache-dir GDAL==2.4.2
+    pip install --no-cache-dir GDAL==3.0.4
 
 # install parallel
 RUN apt-get -y install parallel
@@ -45,4 +45,4 @@ RUN chmod +x bin/*
 RUN cp bin/* /usr/local/bin/
 
 USER force-sar
-# ENTRYPOINT [ "force-sar" ]
+ENTRYPOINT [ "force-sar" ]
