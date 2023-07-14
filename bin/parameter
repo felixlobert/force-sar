@@ -5,7 +5,7 @@ import shutil
 
 import click
 
-input_file = "/home/eouser/projects/force-sar/prm/force-sar.prm"
+input_file = "/home/force-sar/prm/force-sar.prm"
 
 
 @click.command()
