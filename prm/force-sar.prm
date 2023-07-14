@@ -23,7 +23,7 @@ FORCE_GRID = demo/force_grid.gpkg
 # Satellite data repository to use. If you are not connected to CODE-DE or
 # CREODIAS, choose ASF to download the S1 data.
 # Type: Character list. Valid values: {CODEDE,CREODIAS,ASF}
-DATA_SOURCE = CODEDE
+DATA_SOURCE = ASF
 
 # PARALLEL PROCESSING
 # ------------------------------------------------------------------------

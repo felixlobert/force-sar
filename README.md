@@ -42,7 +42,7 @@ alias force-sar=' \
 
 ## Usage
 
-Using the force-sar functions is similar to using FORCE. To get started, prepare a parameter file and provide it to one of the functions. You can find an example parameter file at `demo/prm_file.prm`. To learn more about the required arguments and options for a function, you can add `--help` to the command. For example:
+Using the force-sar functions is similar to using FORCE. To get started, prepare a parameter file and provide it to one of the functions. You can create a parameter file with `force-sar parameter`. To learn more about the required arguments and options for a function, you can add `--help` to the command. For example:
 ```bash
 force-sar query --help
 ```

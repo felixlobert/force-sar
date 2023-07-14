@@ -1,0 +1,26 @@
+#!/usr/bin/python3
+
+import os
+import click
+import shutil
+
+input_file = "/home/eouser/projects/force-sar/prm/force-sar.prm"
+
+@click.command()
+@click.argument("parameter_file", type=click.Path(dir_okay=False))
+def write_prm_file(parameter_file):
+    """Create a force-sar parameter file with default values"""
+
+    # Extract the directory path from the output path
+    output_dir = os.path.dirname(parameter_file)
+
+    # Check if the output directory exists
+    if not os.path.isdir(output_dir):
+        click.echo(f"Output directory \"{output_dir}\" does not exist")
+    else:
+        # Copy the input file to the output file
+        shutil.copyfile(input_file, parameter_file)
+        click.echo(f"Parameter file was written to: {parameter_file}")
+
+if __name__ == "__main__":
+    write_prm_file()

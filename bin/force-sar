@@ -25,6 +25,7 @@ FORCE-SAR integrates Sentinel-1 Synthetic Radar Aperture imagery into the Framew
 
 FORCE-SAR consists of the following components:
 
++ parameter  Generation of parameter files
 + query      Query S1 scenes from CODEDE/CREODIAS/ASF matching criteria give in a PRM file
 + download   Donwload the queried scenes from Alaska Satellite Facility
 + process    Process data previously downloaded or directly from the repository 
