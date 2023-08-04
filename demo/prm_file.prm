@@ -80,6 +80,9 @@ DOY_RANGE = 1 365
 
 # BACKSCATTER-COEFFICIENT PROCESSING
 # ------------------------------------------------------------------------
+# Digital elevation model to be used for Terrain-Flattening and Correction.
+# Type: Character. Valid values: {SRTM 1Sec HGT, Copernicus 30m Global DEM}
+DEM = SRTM 1Sec HGT
 # Mode of radiometric correction applied to the data
 # Type: Character. Valid values: {GAMMA}
 RADIOMETRIC_CORRECTION = GAMMA
