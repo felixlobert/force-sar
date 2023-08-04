@@ -25,27 +25,38 @@
     </sources>
     <parameters class="com.bc.ceres.binding.dom.XppDomElement">
       <selectedPolarisations/>
-      <borderLimit>500</borderLimit>
+      <borderLimit>1000</borderLimit>
       <trimThreshold>0.5</trimThreshold>
+    </parameters>
+  </node>
+  <node id="Apply-Orbit-File">
+    <operator>Apply-Orbit-File</operator>
+    <sources>
+      <sourceProduct refid="Remove-GRD-Border-Noise"/>
+    </sources>
+    <parameters class="com.bc.ceres.binding.dom.XppDomElement">
+      <orbitType>Sentinel Precise (Auto Download)</orbitType>
+      <polyDegree>3</polyDegree>
+      <continueOnFail>true</continueOnFail>
     </parameters>
   </node>
   <node id="Calibration">
     <operator>Calibration</operator>
     <sources>
-      <sourceProduct refid="Remove-GRD-Border-Noise"/>
+      <sourceProduct refid="Apply-Orbit-File"/>
     </sources>
     <parameters class="com.bc.ceres.binding.dom.XppDomElement">
       <sourceBands/>
-      <auxFile>Latest Auxiliary File</auxFile>
+      <auxFile>Product Auxiliary File</auxFile>
       <externalAuxFile/>
       <outputImageInComplex>false</outputImageInComplex>
       <outputImageScaleInDb>false</outputImageScaleInDb>
-      <createGammaBand>true</createGammaBand>
-      <createBetaBand>false</createBetaBand>
+      <createGammaBand>false</createGammaBand>
+      <createBetaBand>true</createBetaBand>
       <selectedPolarisations>VV,VH</selectedPolarisations>
       <outputSigmaBand>false</outputSigmaBand>
-      <outputGammaBand>true</outputGammaBand>
-      <outputBetaBand>false</outputBetaBand>
+      <outputGammaBand>false</outputGammaBand>
+      <outputBetaBand>true</outputBetaBand>
     </parameters>
   </node>
   <node id="Speckle-Filter">
@@ -68,14 +79,31 @@
       <anSize>50</anSize>
     </parameters>
   </node>
-  <node id="Terrain-Correction">
-    <operator>Terrain-Correction</operator>
+  <node id="Terrain-Flattening">
+    <operator>Terrain-Flattening</operator>
     <sources>
       <sourceProduct refid="Speckle-Filter"/>
     </sources>
     <parameters class="com.bc.ceres.binding.dom.XppDomElement">
       <sourceBands/>
-      <demName>SRTM 1Sec HGT</demName>
+      <demName>$dem</demName>
+      <demResamplingMethod>BILINEAR_INTERPOLATION</demResamplingMethod>
+      <externalDEMFile/>
+      <externalDEMNoDataValue>0.0</externalDEMNoDataValue>
+      <externalDEMApplyEGM>false</externalDEMApplyEGM>
+      <outputSimulatedImage>false</outputSimulatedImage>
+      <additionalOverlap>0.1</additionalOverlap>
+      <oversamplingMultiple>1.0</oversamplingMultiple>
+    </parameters>
+  </node>
+  <node id="Terrain-Correction">
+    <operator>Terrain-Correction</operator>
+    <sources>
+      <sourceProduct refid="Terrain-Flattening"/>
+    </sources>
+    <parameters class="com.bc.ceres.binding.dom.XppDomElement">
+      <sourceBands/>
+      <demName>$dem</demName>
       <externalDEMFile/>
       <externalDEMNoDataValue>0.0</externalDEMNoDataValue>
       <externalDEMApplyEGM>true</externalDEMApplyEGM>
@@ -86,7 +114,7 @@
       <alignToStandardGrid>true</alignToStandardGrid>
       <standardGridOriginX>0.0</standardGridOriginX>
       <standardGridOriginY>0.0</standardGridOriginY>
-      <nodataValueAtSea>false</nodataValueAtSea>
+      <nodataValueAtSea>true</nodataValueAtSea>
       <saveDEM>false</saveDEM>
       <saveLatLon>false</saveLatLon>
       <saveIncidenceAngleFromEllipsoid>false</saveIncidenceAngleFromEllipsoid>
